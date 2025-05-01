@@ -13,14 +13,18 @@ export default function ImageUpscaler() {
     const [preview, setPreview] = useState<string | null>(null)
     const [factor, setFactor] = useState<"2x" | "3x">("2x")
     const [upscaled, setUpscaled] = useState<string | null>(null)
+    const [loading, setLoading] = useState(false)
 
     const handleUpload = (file: File) => {
         const url = URL.createObjectURL(file);
         setPreview(url)
         setUpscaled(null)
     }
+
     const handleUpscale = () => {
         if (!preview) return
+        setLoading(true)
+
         const img = new Image()
         img.onload = () => {
             const scale = parseInt(factor)
@@ -28,10 +32,13 @@ export default function ImageUpscaler() {
             canvas.width = img.width * scale
             canvas.height = img.height * scale
             canvas.getContext("2d")?.drawImage(img, 0, 0, canvas.width, canvas.height)
+
             setUpscaled(canvas.toDataURL("image/png"))
+            setLoading(false)
         }
         img.src = preview
     }
+
 
     const handleDownload = () => {
         if (!upscaled) return
@@ -74,9 +81,14 @@ export default function ImageUpscaler() {
                     }} />
 
                     <div className="flex flex-col items-center gap-3">
-                        <Button className="w-full sm:w-[80%] bg-neutral-400 hover:bg-neutral-500 text-white cursor-pointer" onClick={handleUpscale}>
-                            Upscale Image
+                        <Button
+                            disabled={loading}
+                            className="w-full sm:w-[80%] bg-neutral-400 hover:bg-neutral-500 text-white cursor-pointer"
+                            onClick={handleUpscale}
+                        >
+                            {loading ? "Upscaling..." : "Upscale Image"}
                         </Button>
+
 
                         <Button className="w-full sm:w-[80%] bg-neutral-100 text-gray-700 hover:bg-neutral-200 cursor-pointer" onClick={handleReupload}>
                             <Upload className="mr-2" />
