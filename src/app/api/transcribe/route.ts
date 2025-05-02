@@ -13,7 +13,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "No file uploaded" }, { status: 400 });
     }
     const buffer = Buffer.from(await file.arrayBuffer());
-    const uploadRes: any = await client.files.upload(buffer);
+    const uploadRes = await client.files.upload(buffer);
     const transcript = await client.transcripts.transcribe({
       audio: uploadRes,
       speech_model: "slam-1",

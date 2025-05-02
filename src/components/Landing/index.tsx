@@ -82,7 +82,8 @@ const LandingPage = () => {
               More Tools Coming Soon
             </AlertTitle>
             <AlertDescription className="text-zinc-400">
-              We're working on more AI-powered tools. Stay tuned for updates!
+              We&apos;re working on more AI-powered tools. Stay tuned for
+              updates!
             </AlertDescription>
           </div>
         </Alert>
