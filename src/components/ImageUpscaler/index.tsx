@@ -3,6 +3,8 @@
 import { Download, Upload } from "lucide-react"
 import { useState } from "react"
 
+import Upscaler from "upscaler"
+
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import DropZone from "./DropZone"
@@ -21,23 +23,35 @@ export default function ImageUpscaler() {
         setUpscaled(null)
     }
 
-    const handleUpscale = () => {
-        if (!preview) return
-        setLoading(true)
+    const handleUpscale = async () => {
+        if (!preview) return;
+        setLoading(true);
 
-        const img = new Image()
-        img.onload = () => {
-            const scale = parseInt(factor)
-            const canvas = document.createElement("canvas")
-            canvas.width = img.width * scale
-            canvas.height = img.height * scale
-            canvas.getContext("2d")?.drawImage(img, 0, 0, canvas.width, canvas.height)
+        try {
+            const img = new Image();
+            img.crossOrigin = "anonymous";
+            img.src = preview;
 
-            setUpscaled(canvas.toDataURL("image/png"))
-            setLoading(false)
+            img.onload = async () => {
+                const upscaler = new Upscaler();
+                const upscaled = await upscaler.execute(img, {
+                    output: "base64",
+                    patchSize: 128,
+                    padding: 2,
+                    progress: (progress) => {
+                        console.log("Progress:", progress);
+                    },
+                });
+
+                setUpscaled(upscaled as string);
+            };
+        } catch (err) {
+            console.error("Upscaling failed:", err);
+            alert("AI upscaling failed.");
+        } finally {
+            setLoading(false);
         }
-        img.src = preview
-    }
+    };
 
 
     const handleDownload = () => {
@@ -85,18 +99,19 @@ export default function ImageUpscaler() {
                             disabled={loading}
                             className="w-full sm:w-[80%] bg-neutral-400 hover:bg-neutral-500 text-white cursor-pointer"
                             onClick={handleUpscale}
+                            suppressHydrationWarning
                         >
                             {loading ? "Upscaling..." : "Upscale Image"}
                         </Button>
 
 
-                        <Button className="w-full sm:w-[80%] bg-neutral-100 text-gray-700 hover:bg-neutral-200 cursor-pointer" onClick={handleReupload}>
+                        <Button className="w-full sm:w-[80%] bg-neutral-100 text-gray-700 hover:bg-neutral-200 cursor-pointer" onClick={handleReupload} suppressHydrationWarning>
                             <Upload className="mr-2" />
                             Reupload
                         </Button>
 
                         {upscaled && (
-                            <Button className="w-full sm:w-[80%] bg-neutral-400 hover:bg-neutral-500 text-white cursor-pointer" onClick={handleDownload}>
+                            <Button className="w-full sm:w-[80%] bg-neutral-400 hover:bg-neutral-500 text-white cursor-pointer" onClick={handleDownload} suppressHydrationWarning>
                                 <Download className="w-4 h-4 mr-2" />
                                 Save
                             </Button>
