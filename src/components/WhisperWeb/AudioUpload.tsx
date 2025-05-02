@@ -60,7 +60,7 @@ const AudioUpload = ({
   };
 
   return (
-    <div className="flex items-center justify-center gap-7">
+    <div className="flex max-[533px]:flex-col max-[533px]:gap-3 items-center justify-center gap-7">
       <Button
         size="lg"
         onClick={isRecording ? handleStopRecording : handleStartRecording}
