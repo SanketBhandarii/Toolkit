@@ -1,9 +1,19 @@
-import ImageUpscaler from "@/components/ImageUpscaler";
+import { Metadata } from "next";
+import React from "react";
 
-export default function Home() {
+import LandingPage from "@/components/Landing";
+
+export const metadata: Metadata = {
+  title: "Web Tools",
+  description: "Get your tools here",
+};
+
+const page = () => {
   return (
     <div>
-      <ImageUpscaler />
+      <LandingPage />
     </div>
   );
-}
+};
+
+export default page;
