@@ -15,14 +15,19 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 const tools = [
   {
+    name: "Text to Speech",
+    description: "Convert text to speech ",
+    href: "/texttospeech",
+  },
+  {
+    name: "Speech to Text",
+    description: "Transcribe audio using whipser model",
+    href: "/whisperweb",
+  },
+  {
     name: "Image Upscaler",
     description: "Enhance low-resolution images with AI.",
     href: "/imageupscaler",
-  },
-  {
-    name: "WhisperWEB",
-    description: "Transcribe audio instantly using Whisper API.",
-    href: "/whisperweb",
   },
 ];
 

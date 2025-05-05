@@ -23,34 +23,24 @@ export default function ImageUpscaler() {
     setUpscaled(null);
   };
 
-  const handleUpscale = async () => {
+  const handleUpscale = () => {
     if (!preview) return;
     setLoading(true);
 
-    try {
-      const img = new Image();
-      img.crossOrigin = "anonymous";
-      img.src = preview;
+    const img = new Image();
+    img.onload = () => {
+      const scale = parseInt(factor);
+      const canvas = document.createElement("canvas");
+      canvas.width = img.width * scale;
+      canvas.height = img.height * scale;
+      canvas
+        .getContext("2d")
+        ?.drawImage(img, 0, 0, canvas.width, canvas.height);
 
-      img.onload = async () => {
-        const upscaler = new Upscaler();
-        const upscaled = await upscaler.execute(img, {
-          output: "base64",
-          patchSize: 128,
-          padding: 2,
-          progress: (progress) => {
-            console.log("Progress:", progress);
-          },
-        });
-
-        setUpscaled(upscaled as string);
-      };
-    } catch (err) {
-      console.error("Upscaling failed:", err);
-      alert("AI upscaling failed.");
-    } finally {
+      setUpscaled(canvas.toDataURL("image/png"));
       setLoading(false);
-    }
+    };
+    img.src = preview;
   };
 
   const handleDownload = () => {

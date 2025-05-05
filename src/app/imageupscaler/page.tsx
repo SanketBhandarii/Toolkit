@@ -9,8 +9,9 @@ export const metadata: Metadata = {
 
 export default function Home() {
   return (
-    <div>
+    <div >
       <ImageUpscaler />
+      {/* <h1 className="text-center mt-[36%]">Under construction..</h1> */}
     </div>
   );
 }
