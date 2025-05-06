@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Textarea } from "../ui/textarea";
 import {
   Select,
@@ -11,7 +11,7 @@ import {
 } from "../ui/select";
 import { Label } from "../ui/label";
 import { Button } from "../ui/button";
-import { getSpeech } from "./utils/getSpeech";
+import { loadModel, getSpeech } from "./utils/getSpeech";
 
 type Status = "idle" | "generating" | "speaking";
 
@@ -21,6 +21,10 @@ const Container = () => {
   const [text, setText] = useState("");
   const [voice, setVoice] = useState("US-Male");
   const [status, setStatus] = useState<Status>("idle");
+
+  useEffect(() => {
+    loadModel();
+  }, []);
 
   const handleGenerateSpeech = async () => {
     if (!text.trim()) return;
