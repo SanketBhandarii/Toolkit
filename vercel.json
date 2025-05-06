@@ -1,8 +1,7 @@
 {
-    "functions": {
-      "app/api/**/route.{js,ts}": {
-        "excludeFiles": "{.next,*.cache,node_modules,public}/**"
-      }
+  "functions": {
+    "app/api/**/route.{js,ts}": {
+      
     }
   }
-  
+}

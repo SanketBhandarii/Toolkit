@@ -1,7 +1,16 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  experimental: {
+    outputFileTracing: true,
+    outputFileTracingExcludes: {
+      "**/*.test.{js,ts,jsx,tsx}": ["**"],
+      "**/__mocks__/**": ["**"],
+      "**/*.map": ["**"],
+      "**/test/**": ["**"],
+      "**/tests/**": ["**"]
+    }
+  } as any
 };
 
 export default nextConfig;
