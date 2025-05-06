@@ -29,7 +29,7 @@ const TranscriptionDisplay = ({
     };
 
     transcribe();
-  }, [audioFile]);
+  }, [sendAudio]);
 
   const handleCopy = () => {
     navigator.clipboard.writeText(transcription);
