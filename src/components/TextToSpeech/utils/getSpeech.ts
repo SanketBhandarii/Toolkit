@@ -16,5 +16,7 @@ export async function getSpeech(text: string, voice: string) {
     voice: voice === "US-Male" ? "am_adam" : "af_heart",
   });
 
+  audioCache.set(cacheKey, audio);
+  
   return audio;
 }
