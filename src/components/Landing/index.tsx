@@ -29,6 +29,11 @@ const tools = [
     description: "Enhance low-resolution images with AI.",
     href: "/imageupscaler",
   },
+  {
+    name: "Image Segmenter",
+    description: "Segment your images",
+    href: "/imagesegmenter",
+  },
 ];
 
 const LandingPage = () => {
