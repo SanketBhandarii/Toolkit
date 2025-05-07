@@ -51,7 +51,7 @@ export default function Toolbar({
       >
         <Trash2 className="mr-2 h-4 w-4" />
         Start Over
-      </Button> 
+      </Button>
     </div>
   );
 }

@@ -1,177 +1,140 @@
 "use client";
 
 import React, { useRef, useState, useEffect } from "react";
-import * as bodyPix from "@tensorflow-models/body-pix";
+import * as deeplab from "@tensorflow-models/deeplab";
 import "@tensorflow/tfjs";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Trash2, Loader2 } from "lucide-react";
 import ImageUploader from "./ImageUploader";
-import Toolbar from "./Toolbar";
+
+type Segment = { url: string };
+type DeepLabModelType = Awaited<ReturnType<typeof deeplab.load>>;
 
 export default function ImageSegmenter() {
+  const [model, setModel] = useState<DeepLabModelType | null>(null);
   const [loading, setLoading] = useState(false);
-  const [modelLoading, setModelLoading] = useState(true);
-  const [model, setModel] = useState<bodyPix.BodyPix | null>(null);
   const [imageUrl, setImageUrl] = useState<string | null>(null);
-  const [resultUrl, setResultUrl] = useState<string | null>(null);
-  const [segmentation, setSegmentation] =
-    useState<bodyPix.SemanticPersonSegmentation | null>(null);
-  const imageRef = useRef<HTMLImageElement | null>(null);
-  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const [segments, setSegments] = useState<Segment[]>([]);
+  const imageRef = useRef<HTMLImageElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
-    async function loadModel() {
-      try {
-        const net = await bodyPix.load({
-          architecture: "MobileNetV1",
-          outputStride: 16,
-          multiplier: 0.75,
-          quantBytes: 2,
-        });
-        setModel(net);
-      } catch (error) {
-        console.error("Failed to load model", error);
-      } finally {
-        setModelLoading(false);
-      }
-    }
-    loadModel();
+    deeplab.load({ base: "pascal", quantizationBytes: 4 }).then(setModel);
   }, []);
 
-  useEffect(() => {
-    if (segmentation && imageRef.current && canvasRef.current) {
-      renderSegmentation();
-    }
-  }, [segmentation]);
-
-  const handleImageSelected = (_file: File, url: string) => {
+  const handleImageSelected = (_: File, url: string) => {
     setImageUrl(url);
-    setResultUrl(null);
-    setSegmentation(null);
-  };
-
-  const renderSegmentation = () => {
-    if (!segmentation || !canvasRef.current || !imageRef.current) return;
-
-    const canvas = canvasRef.current;
-    canvas.width = imageRef.current.width;
-    canvas.height = imageRef.current.height;
-
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
-
-    ctx.drawImage(imageRef.current, 0, 0);
-
-    const mask = bodyPix.toMask(
-      segmentation,
-      { r: 0, g: 0, b: 0, a: 0 },
-      { r: 0, g: 255, b: 0, a: 200 }
-    );
-
-    bodyPix.drawMask(canvas, imageRef.current, mask, 0);
-    setResultUrl(canvas.toDataURL());
+    setSegments([]);
   };
 
   const handleSegment = async () => {
-    if (!imageRef.current || !model || !canvasRef.current) return;
-
+    if (!model || !imageRef.current || !canvasRef.current) return;
     setLoading(true);
-    try {
-      const newSegmentation = await model.segmentPerson(imageRef.current, {
-        flipHorizontal: false,
-        internalResolution: "medium",
-        segmentationThreshold: 0.7,
-      });
 
-      setSegmentation(newSegmentation);
-    } catch (error) {
-      console.error("Segmentation failed", error);
-      alert("Segmentation failed. The image may not contain a person.");
-    } finally {
-      setLoading(false);
+    const { segmentationMap, width, height } = await model.segment(imageRef.current);
+    const ctx = canvasRef.current.getContext("2d");
+    canvasRef.current.width = width;
+    canvasRef.current.height = height;
+    ctx?.drawImage(imageRef.current, 0, 0, width, height);
+    const originalData = ctx?.getImageData(0, 0, width, height);
+
+    const validLabels = Array.from(new Set(segmentationMap)).filter(
+      (label) => label >= 0 && label < 21
+    );
+
+    const results: Segment[] = [];
+
+    for (const label of validLabels) {
+      const segCanvas = document.createElement("canvas");
+      segCanvas.width = width;
+      segCanvas.height = height;
+      const segCtx = segCanvas.getContext("2d");
+      const newImage = segCtx?.createImageData(width, height);
+      if (!newImage || !originalData) continue;
+
+      for (let i = 0; i < segmentationMap.length; i++) {
+        const offset = i * 4;
+        if (segmentationMap[i] === label) {
+          newImage.data[offset] = originalData.data[offset];
+          newImage.data[offset + 1] = originalData.data[offset + 1];
+          newImage.data[offset + 2] = originalData.data[offset + 2];
+          newImage.data[offset + 3] = 255;
+        } else {
+          newImage.data[offset + 3] = 0;
+        }
+      }
+
+      segCtx?.putImageData(newImage, 0, 0);
+      results.push({ url: segCanvas.toDataURL() });
     }
-  };
 
-  const handleDownload = () => {
-    if (!resultUrl) return;
-    const link = document.createElement("a");
-    link.href = resultUrl;
-    link.download = `segmented-image-${Date.now()}.png`;
-    link.click();
+    setSegments(results);
+    setLoading(false);
   };
 
   const handleClear = () => {
     setImageUrl(null);
-    setResultUrl(null);
-    setSegmentation(null);
+    setSegments([]);
+  };
+
+  const handleDownload = () => {
+    if (!segments.length) return;
+    const link = document.createElement("a");
+    link.href = segments[0].url;
+    link.download = `segment-${Date.now()}.png`;
+    link.click();
   };
 
   return (
-    <div className="flex flex-col justify-center items-center min-h-screen p-4 bg-gray-50">
-      <Card className="w-full max-w-xl shadow-lg border-none">
+    <div className="min-h-screen bg-gray-100 p-6 flex justify-center items-center">
+      <Card className="w-full max-w-7xl shadow-lg border-none">
         <CardContent className="p-6">
-          <div className="flex items-center justify-center mb-6">
-            <h2 className="text-2xl font-bold text-center">
-              AI Image Segmenter
-            </h2>
-          </div>
+          <h2 className="text-3xl font-bold text-center mb-8">AI Image Segmenter</h2>
 
-          {modelLoading ? (
-            <div className="flex flex-col items-center justify-center p-8 space-y-4">
-              <Loader2 className="h-8 w-8 animate-spin text-primary" />
-              <p className="text-gray-500">Loading segmentation model...</p>
+          {!model ? (
+            <div className="flex justify-center items-center py-12">
+              <Loader2 className="h-6 w-6 animate-spin mr-2" />
+              <span>Loading model...</span>
             </div>
+          ) : !imageUrl ? (
+            <ImageUploader onImageSelected={handleImageSelected} />
           ) : (
-            <div className="space-y-6">
-              {!imageUrl ? (
-                <ImageUploader onImageSelected={handleImageSelected} />
-              ) : !resultUrl ? (
-                <>
-                  <div className="relative border border-neutral-200 rounded-lg overflow-hidden">
-                    <img
-                      src={imageUrl}
-                      ref={imageRef}
-                      alt="Selected image"
-                      className="w-full object-contain max-h-80"
-                    />
-                  </div>
-
-                  <div className="flex space-x-2">
-                    <Button
-                      onClick={handleClear}
-                      variant="outline"
-                      className="flex-1 border-neutral-400 text-neutral-500 cursor-pointer"
-                    >
-                      <Trash2 className="mr-2 h-4 w-4" />
-                      Clear
-                    </Button>
-                    <Button
-                      onClick={handleSegment}
-                      disabled={loading}
-                      className="flex-1 bg-sky-500 hover:bg-sky-600 cursor-pointer text-white"
-                    >
-                      {loading ? (
-                        <>
-                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                          Processing...
-                        </>
-                      ) : (
-                        "Segment Image"
-                      )}
-                    </Button>
-                  </div>
-                </>
-              ) : (
-                <>
-                  <Toolbar
-                    onDownload={handleDownload}
-                    onClear={handleClear}
-                    resultUrl={resultUrl}
-                    setResultUrl={setResultUrl}
+            <div className="grid lg:grid-cols-2 gap-8">
+              <div className="flex flex-col items-center space-y-4">
+                <div className="border rounded overflow-hidden">
+                  <img
+                    ref={imageRef}
+                    src={imageUrl}
+                    alt="Uploaded"
+                    className="max-w-full max-h-[500px] object-contain"
                   />
-                </>
-              )}
+                </div>
+                <div className="flex flex-wrap gap-4 justify-center">
+                  <Button onClick={handleClear} variant="outline">
+                    <Trash2 className="h-4 w-4 mr-2" />
+                    Start Over
+                  </Button>
+                  <Button onClick={handleSegment} disabled={loading}>
+                    {loading ? (
+                      <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                    ) : null}
+                    Segment
+                  </Button>
+                  {segments.length > 0 && (
+                    <Button onClick={handleDownload}>
+                      Download
+                    </Button>
+                  )}
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                {segments.map((seg, i) => (
+                  <div key={i} className="border rounded overflow-hidden shadow-sm bg-white">
+                    <img src={seg.url} alt={`Segment ${i}`} className="w-full object-contain max-h-56" />
+                  </div>
+                ))}
+              </div>
             </div>
           )}
 
