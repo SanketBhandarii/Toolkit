@@ -2,12 +2,10 @@
 
 import { Button } from "@/components/ui/button";
 import { Download, Trash2, RefreshCw } from "lucide-react";
-import { Slider } from "@/components/ui/slider";
 
 interface ToolbarProps {
   onDownload: () => void;
   onClear: () => void;
-  hasResult: boolean;
   resultUrl: string | null;
   setResultUrl: (url: string | null) => void;
 }
@@ -15,7 +13,6 @@ interface ToolbarProps {
 export default function Toolbar({
   onDownload,
   onClear,
-  hasResult,
   resultUrl,
   setResultUrl,
 }: ToolbarProps) {
@@ -54,7 +51,7 @@ export default function Toolbar({
       >
         <Trash2 className="mr-2 h-4 w-4" />
         Start Over
-      </Button>
+      </Button> 
     </div>
   );
 }

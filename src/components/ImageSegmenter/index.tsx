@@ -5,8 +5,7 @@ import * as bodyPix from "@tensorflow-models/body-pix";
 import "@tensorflow/tfjs";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Slider } from "@/components/ui/slider";
-import { Download, RefreshCw, Trash2, Loader2 } from "lucide-react";
+import { Trash2, Loader2 } from "lucide-react";
 import ImageUploader from "./ImageUploader";
 import Toolbar from "./Toolbar";
 
@@ -15,7 +14,6 @@ export default function ImageSegmenter() {
   const [modelLoading, setModelLoading] = useState(true);
   const [model, setModel] = useState<bodyPix.BodyPix | null>(null);
   const [imageUrl, setImageUrl] = useState<string | null>(null);
-  const [imageFile, setImageFile] = useState<File | null>(null);
   const [resultUrl, setResultUrl] = useState<string | null>(null);
   const [segmentation, setSegmentation] =
     useState<bodyPix.SemanticPersonSegmentation | null>(null);
@@ -48,7 +46,6 @@ export default function ImageSegmenter() {
   }, [segmentation]);
 
   const handleImageSelected = (_file: File, url: string) => {
-    setImageFile(_file);
     setImageUrl(url);
     setResultUrl(null);
     setSegmentation(null);
@@ -106,7 +103,6 @@ export default function ImageSegmenter() {
 
   const handleClear = () => {
     setImageUrl(null);
-    setImageFile(null);
     setResultUrl(null);
     setSegmentation(null);
   };
@@ -171,7 +167,6 @@ export default function ImageSegmenter() {
                   <Toolbar
                     onDownload={handleDownload}
                     onClear={handleClear}
-                    hasResult={!!resultUrl}
                     resultUrl={resultUrl}
                     setResultUrl={setResultUrl}
                   />
