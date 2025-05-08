@@ -81,7 +81,7 @@ export default function Dropzone({
               height={500}
               onLoad={() => URL.revokeObjectURL(files[0].preview)}
               className={cn(
-                "aspect-video w-full object-cover",
+                "aspect-video w-full object-contain",
                 status !== "complete" && "animate-pulse"
               )}
             />
