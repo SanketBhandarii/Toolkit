@@ -3,6 +3,7 @@ import {
   env,
   PipelineType,
   ProgressCallback,
+  ObjectDetectionPipeline,
 } from "@huggingface/transformers";
 
 env.allowLocalModels = false;
@@ -10,23 +11,28 @@ env.allowLocalModels = false;
 class Pipeline {
   static task: PipelineType = "object-detection";
   static model = "Xenova/detr-resnet-50";
-  static instance: any = null;
+  static instance: ObjectDetectionPipeline | null = null;
 
   static async getInstance(progress_callback?: ProgressCallback) {
     if (this.instance === null) {
-      this.instance = await pipeline(this.task, this.model, {
+      this.instance = (await pipeline(this.task, this.model, {
         progress_callback,
-      });
+      })) as ObjectDetectionPipeline;
     }
     return this.instance;
   }
 }
 
-self.addEventListener("message", async (event: MessageEvent<{ image: any }>) => {
-  const detector = await Pipeline.getInstance((x) => {
-    self.postMessage(x);
-  });
+self.addEventListener(
+  "message",
+  async (event: MessageEvent<{ image: string | ArrayBuffer | null }>) => {
+    const detector = await Pipeline.getInstance((x) => {
+      self.postMessage(x);
+    });
 
-  const result = await detector(event.data.image, { percentage: true });
-  self.postMessage({ status: "complete", result });
-});
+    const result = await detector(event.data.image as string, {
+      percentage: true,
+    });
+    self.postMessage({ status: "complete", result });
+  }
+);

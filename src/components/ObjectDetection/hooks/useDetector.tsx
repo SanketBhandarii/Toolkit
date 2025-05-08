@@ -1,14 +1,20 @@
 import { useState, useCallback } from "react";
 import { useWorker } from "./useWorker";
 
+type Detection = {
+  bbox: [number, number, number, number];
+  label: string;
+  score: number;
+};
+
 type DetectorMessage = {
   status: "initiate" | "progress" | "ready" | "complete";
   progress?: number;
-  result?: any;
+  result?: Detection[];
 };
 
 export function useDetector() {
-  const [result, setResult] = useState<any>(null);
+  const [result, setResult] = useState<Detection[] | null>(null);
   const [ready, setReady] = useState<boolean | null>(null);
   const [progress, setProgress] = useState(0);
   const [status, setStatus] = useState("");
