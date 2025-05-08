@@ -15,6 +15,16 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 const tools = [
   {
+    name: "Object Detection",
+    description: "Detect objects in images",
+    href: "/objectdetection",
+  },
+  {
+    name: "Image Segmenter",
+    description: "Segment your images",
+    href: "/imagesegmenter",
+  },
+  {
     name: "Text to Speech",
     description: "Convert text to speech ",
     href: "/texttospeech",
@@ -28,11 +38,6 @@ const tools = [
     name: "Image Upscaler",
     description: "Enhance low-resolution images with AI.",
     href: "/imageupscaler",
-  },
-  {
-    name: "Image Segmenter",
-    description: "Segment your images",
-    href: "/imagesegmenter",
   },
 ];
 
