@@ -4,18 +4,14 @@ import { useDropzone, FileRejection } from "react-dropzone";
 import { cn } from "@/lib/utils";
 import { X } from "lucide-react";
 import BoundingBox from "./BoundingBox";
-
-type DetectionObject = {
-  box: { xmin: number; ymin: number; xmax: number; ymax: number };
-  label: string;
-};
+import type { Detection } from "./hooks/useDetector"; // wherever it's located
 
 type DropzoneProps = {
   status: string;
   setStatus: (status: string) => void;
   detector: (image: string | ArrayBuffer | null) => void;
-  result: DetectionObject[] | null;
-  setResult: (result: DetectionObject[] | null) => void;
+  result: Detection[] | null;
+  setResult: (result: Detection[] | null) => void;
   className: string;
 };
 
@@ -92,6 +88,7 @@ export default function Dropzone({
             {result?.map((object, i) => (
               <BoundingBox key={i} object={object} />
             ))}
+
             <button
               onClick={remove}
               className="absolute top-2 right-2 z-10 flex h-7 w-7 items-center justify-center rounded-full bg-rose-400 text-white cursor-pointer"

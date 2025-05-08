@@ -1,10 +1,15 @@
 import { useState, useCallback } from "react";
 import { useWorker } from "./useWorker";
 
-type Detection = {
-  bbox: [number, number, number, number];
+export type Detection = {
   label: string;
   score: number;
+  box: {
+    xmin: number;
+    ymin: number;
+    xmax: number;
+    ymax: number;
+  };
 };
 
 type DetectorMessage = {

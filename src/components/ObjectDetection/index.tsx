@@ -46,7 +46,7 @@ export default function ObjectDetection() {
           detector={detector.start}
           result={detector.result}
           setResult={detector.setResult}
-          className="mt-10 rounded-2xl border-4 border-dashed border-gray-300 bg-white p-10 shadow-sm transition hover:border-emerald-500 hover:bg-emerald-50 cursor-pointer"
+          className="mt-10 rounded-2xl border-4 border-dashed border-gray-300 bg-white p-10 shadow-sm transition hover:border-emerald-500 hover:bg-emerald-50 curs"
         />
       </div>
     </section>
