@@ -16,9 +16,7 @@ export default function ObjectDetection() {
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
           <div className="text-center sm:text-left">
             <h1 className="text-4xl font-extrabold text-gray-900">Object Detection</h1>
-            <p className="mt-2 text-lg text-gray-600">
-              Powered by Hugging Face Transformers
-            </p>
+          
           </div>
 
           <div className="text-center sm:text-right w-full sm:w-auto">
