@@ -1,40 +1,39 @@
-"use client";
-
 import { useState, useCallback } from "react";
 import { useWorker } from "./useWorker";
 
+type DetectorMessage = {
+  status: "initiate" | "progress" | "ready" | "complete";
+  progress?: number;
+  result?: any;
+};
+
 export function useDetector() {
-  const [result, setResult] = useState(null);
+  const [result, setResult] = useState<any>(null);
   const [ready, setReady] = useState<boolean | null>(null);
   const [progress, setProgress] = useState(0);
   const [status, setStatus] = useState("");
 
-  const worker = useWorker((e: { data: any }) => {
-    switch (e.data.status) {
-      case "initiate":
-        setStatus("initiate");
-        setReady(false);
-        break;
-      case "progress":
-        setStatus("progress");
-        setProgress(e.data.progress);
-        break;
-      case "ready":
-        setStatus("ready");
-        setReady(true);
-        break;
-      case "complete":
-        setStatus("complete");
-        setResult(e.data.result);
-        break;
+  const worker = useWorker((e: MessageEvent<DetectorMessage>) => {
+    const { status, progress, result } = e.data;
+
+    if (status === "initiate") {
+      setStatus("initiate");
+      setReady(false);
+    } else if (status === "progress") {
+      setStatus("progress");
+      setProgress(progress ?? 0);
+    } else if (status === "ready") {
+      setStatus("ready");
+      setReady(true);
+    } else if (status === "complete") {
+      setStatus("complete");
+      setResult(result ?? []);
     }
   });
 
   const start = useCallback(
-    (image: any) => {
-      if (worker) {
-        worker.postMessage({ image });
-      }
+    (image: string | ArrayBuffer | null) => {
+      if (worker) worker.postMessage({ image });
     },
     [worker]
   );

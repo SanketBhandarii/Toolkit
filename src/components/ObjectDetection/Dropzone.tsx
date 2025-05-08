@@ -1,11 +1,23 @@
-"use client";
-
 import Image from "next/image";
 import { useCallback, useEffect, useState } from "react";
-import { useDropzone } from "react-dropzone";
+import { useDropzone, FileRejection } from "react-dropzone";
 import { cn } from "@/lib/utils";
 import { X } from "lucide-react";
 import BoundingBox from "./BoundingBox";
+
+type DetectionObject = {
+  box: { xmin: number; ymin: number; xmax: number; ymax: number };
+  label: string;
+};
+
+type DropzoneProps = {
+  status: string;
+  setStatus: (status: string) => void;
+  detector: (image: string | ArrayBuffer | null) => void;
+  result: DetectionObject[] | null;
+  setResult: (result: DetectionObject[] | null) => void;
+  className: string;
+};
 
 export default function Dropzone({
   status,
@@ -14,19 +26,12 @@ export default function Dropzone({
   result,
   setResult,
   className,
-}: {
-  status: string;
-  setStatus: Function;
-  detector: Function;
-  result: any;
-  setResult: Function;
-  className: string;
-}) {
-  const [files, setFiles] = useState<any[]>([]);
-  const [rejected, setRejected] = useState<any[]>([]);
+}: DropzoneProps) {
+  const [files, setFiles] = useState<(File & { preview: string })[]>([]);
+  const [rejected, setRejected] = useState<FileRejection[]>([]);
 
   const onDrop = useCallback(
-    (accepted: any[], rejected: any[]) => {
+    (accepted: File[], rejectedFiles: FileRejection[]) => {
       if (accepted.length) {
         const file = accepted[0];
         const preview = URL.createObjectURL(file);
@@ -35,10 +40,10 @@ export default function Dropzone({
         setResult(null);
 
         const reader = new FileReader();
-        reader.onload = (e) => detector(e.target?.result);
+        reader.onload = (e) => detector(e.target?.result ?? null);
         reader.readAsDataURL(file);
       }
-      if (rejected.length) setRejected(rejected);
+      if (rejectedFiles.length) setRejected(rejectedFiles);
     },
     [detector, setResult, setStatus]
   );
@@ -75,7 +80,7 @@ export default function Dropzone({
           <div className="relative mx-auto w-full max-w-sm overflow-hidden rounded-lg shadow">
             <Image
               src={files[0].preview}
-              alt={files[0].name || "Uploaded image"}
+              alt={`Uploaded image: ${files[0].name ?? "unknown"}`}
               width={500}
               height={500}
               onLoad={() => URL.revokeObjectURL(files[0].preview)}
@@ -84,7 +89,7 @@ export default function Dropzone({
                 status !== "complete" && "animate-pulse"
               )}
             />
-            {result?.map((object: any, i: number) => (
+            {result?.map((object, i) => (
               <BoundingBox key={i} object={object} />
             ))}
             <button
@@ -108,7 +113,7 @@ export default function Dropzone({
                 <li key={file.name}>
                   <p className="font-medium">{file.name}</p>
                   <ul className="list-disc pl-5 text-xs">
-                    {errors.map((e: any) => (
+                    {errors.map((e) => (
                       <li key={e.code}>{e.message}</li>
                     ))}
                   </ul>
