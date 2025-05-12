@@ -1,12 +1,13 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { pipeline } from "@huggingface/transformers";
 import { Button } from "@/components/ui/button";
 import { ImageUploader } from "./ImageUploader";
 import { ImagePreview } from "./ImagePreview";
 import { DepthMapViewer } from "./DepthMapViewer";
 import { Loader2 } from "lucide-react";
+
+import { loadDepthEstimator } from "./utils/loadDepthEstimator";
 
 export const DepthEstimatorController = () => {
   type DepthEstimator = (input: string) => Promise<{
@@ -30,11 +31,7 @@ export const DepthEstimatorController = () => {
     const loadModel = async () => {
       try {
         setLoadingModel(true);
-        // const { pipeline } = await import("@huggingface/transformers");
-        const depth_estimator = await pipeline(
-          "depth-estimation",
-          "onnx-community/depth-anything-v2-large"
-        );
+        const depth_estimator = await loadDepthEstimator();
         pipelineRef.current = depth_estimator as DepthEstimator;
         setErrorMessage(null);
       } catch (error) {
