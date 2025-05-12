@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { pipeline } from "@huggingface/transformers";
 import { Button } from "@/components/ui/button";
 import { ImageUploader } from "./ImageUploader";
 import { ImagePreview } from "./ImagePreview";
@@ -29,7 +30,7 @@ export const DepthEstimatorController = () => {
     const loadModel = async () => {
       try {
         setLoadingModel(true);
-        const { pipeline } = await import("@huggingface/transformers");
+        // const { pipeline } = await import("@huggingface/transformers");
         const depth_estimator = await pipeline(
           "depth-estimation",
           "onnx-community/depth-anything-v2-large"
