@@ -15,6 +15,11 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 const tools = [
   {
+    name: "Depth Estimation",
+    description: "Depth of objects present in an image.",
+    href: "/depthestimation",
+  },
+  {
     name: "Object Detection",
     description: "Detect objects in images",
     href: "/objectdetection",
