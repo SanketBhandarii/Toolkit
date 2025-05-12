@@ -7,15 +7,15 @@ import { ImagePreview } from "./ImagePreview";
 import { DepthMapViewer } from "./DepthMapViewer";
 import { Loader2 } from "lucide-react";
 
-type DepthEstimator = (input: string) => Promise<{
-  depth: {
-    data: Uint8ClampedArray;
-    width: number;
-    height: number;
-  };
-}>;
-
 export const DepthEstimatorController = () => {
+  type DepthEstimator = (input: string) => Promise<{
+    depth: {
+      data: Uint8ClampedArray;
+      width: number;
+      height: number;
+    };
+  }>;
+
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [depthUrl, setDepthUrl] = useState<string | null>(null);
