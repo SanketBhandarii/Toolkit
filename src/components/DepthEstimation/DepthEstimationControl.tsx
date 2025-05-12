@@ -7,6 +7,14 @@ import { ImagePreview } from "./ImagePreview";
 import { DepthMapViewer } from "./DepthMapViewer";
 import { Loader2 } from "lucide-react";
 
+type DepthEstimator = (input: string) => Promise<{
+  depth: {
+    data: Uint8ClampedArray;
+    width: number;
+    height: number;
+  };
+}>;
+
 export const DepthEstimatorController = () => {
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imageUrl, setImageUrl] = useState<string | null>(null);
@@ -15,7 +23,7 @@ export const DepthEstimatorController = () => {
   const [loadingModel, setLoadingModel] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const pipelineRef = useRef<any>(null);
+  const pipelineRef = useRef<DepthEstimator | null>(null);
 
   useEffect(() => {
     const loadModel = async () => {
@@ -26,7 +34,7 @@ export const DepthEstimatorController = () => {
           "depth-estimation",
           "onnx-community/depth-anything-v2-large"
         );
-        pipelineRef.current = depth_estimator;
+        pipelineRef.current = depth_estimator as DepthEstimator;
         setErrorMessage(null);
       } catch (error) {
         console.error("Model loading failed:", error);
