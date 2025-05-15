@@ -1,18 +1,22 @@
-import React, { useEffect, useState } from "react";
+import React, { Dispatch, SetStateAction, useEffect, useState } from "react";
 import axios from "axios";
 
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 
 const TranscriptionDisplay = ({
+  transcription,
+  setTranscription,
   audioFile,
   sendAudio,
+  setProcessing,
 }: {
+  transcription: string;
+  setTranscription: Dispatch<SetStateAction<string>>;
   audioFile: File | null;
   sendAudio: boolean;
+  setProcessing: (processing: boolean) => void;
 }) => {
-  const [transcription, setTranscription] = useState("");
-
   useEffect(() => {
     const transcribe = async () => {
       if (!audioFile || !sendAudio) return;
@@ -23,6 +27,7 @@ const TranscriptionDisplay = ({
           headers: { "Content-Type": "multipart/form-data" },
         });
         setTranscription(data?.text);
+        setProcessing(false);
       } catch {
         alert("Error transcribing audio");
       }

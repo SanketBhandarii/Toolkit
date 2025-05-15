@@ -8,6 +8,8 @@ import TranscriptionDisplay from "@/components/WhisperWeb/TranscriptionDisplay";
 const Home = () => {
   const [audioFile, setAudioFile] = useState<File | null>(null);
   const [sendAudio, setSendAudio] = useState(false);
+  const [transcription, setTranscription] = useState("");
+  const [processing, setProcessing] = useState(false);
 
   return (
     <div className="min-h-screen flex justify-center items-center bg-white px-5">
@@ -19,6 +21,9 @@ const Home = () => {
           audioFile={audioFile}
           setAudioFile={setAudioFile}
           setSendAudio={setSendAudio}
+          transcription={transcription}
+          processing={processing}
+          setProcessing={setProcessing}
         />
         {audioFile && (
           <p className="mt-2 text-gray-600 text-center">
@@ -27,7 +32,13 @@ const Home = () => {
         )}
         {audioFile && <AudioPlayer src={URL.createObjectURL(audioFile)} />}
         {audioFile && (
-          <TranscriptionDisplay audioFile={audioFile} sendAudio={sendAudio} />
+          <TranscriptionDisplay
+            transcription={transcription}
+            setTranscription={setTranscription}
+            audioFile={audioFile}
+            sendAudio={sendAudio}
+            setProcessing={setProcessing}
+          />
         )}
       </div>
     </div>

@@ -1,15 +1,22 @@
 import React, { useState } from "react";
 
 import { Button } from "@/components/ui/button";
+import { Loader2 } from "lucide-react";
 
 const AudioUpload = ({
   audioFile,
   setAudioFile,
   setSendAudio,
+  transcription,
+  processing,
+  setProcessing,
 }: {
   audioFile: File | null;
   setAudioFile: (file: File) => void;
   setSendAudio: (sendAudio: boolean) => void;
+  transcription: string;
+  processing: boolean;
+  setProcessing: (processing: boolean) => void;
 }) => {
   const [isRecording, setIsRecording] = useState(false);
   const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(
@@ -22,6 +29,13 @@ const AudioUpload = ({
       setAudioFile(file);
     }
   };
+
+  function handleSendAudio() {
+    if (!processing) {
+      setProcessing(true);
+      setSendAudio(true);
+    }
+  }
 
   const handleStartRecording = async () => {
     try {
@@ -86,10 +100,17 @@ const AudioUpload = ({
       {audioFile && (
         <Button
           size="lg"
-          onClick={() => setSendAudio(true)}
+          onClick={handleSendAudio}
           className="bg-zinc-400 text-white py-2 px-4 rounded hover:bg-zinc-500 cursor-pointer text-sm transition-colors duration-300"
         >
-          Send Audio
+          {processing ? (
+            <div className="flex items-center gap-2">
+              <Loader2 className="animate-spin" />
+              Text generating
+            </div>
+          ) : (
+            <div>Send audio</div>
+          )}
         </Button>
       )}
     </div>
