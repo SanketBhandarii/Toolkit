@@ -1,31 +1,41 @@
 import { loadDepthEstimator } from "./loadDepthEstimator";
 
+// Define a type for the depth estimation result
+type DepthData = {
+  data: Uint8ClampedArray;
+  width: number;
+  height: number;
+};
+
 // Define a type for the depth estimator function
-type DepthEstimator = (image: string) => Promise<{
-  depth: {
-    data: Uint8ClampedArray;
-    width: number;
-    height: number;
-  };
-}>;
+type DepthEstimator = (image: string) => Promise<{ depth: DepthData }>;
+
+// Define the message types
+type WorkerRequest =
+  | { type: "LOAD_MODEL"; payload: null }
+  | { type: "PROCESS_IMAGE"; payload: string };
+
+type WorkerResponse =
+  | { type: "PROGRESS"; payload: number }
+  | { type: "MODEL_LOADED" }
+  | { type: "RESULT"; payload: DepthData }
+  | { type: "ERROR"; payload: string };
 
 let depthEstimator: DepthEstimator | null = null;
 
-self.onmessage = async (event: MessageEvent) => {
-  const { type, payload } = event.data as {
-    type: "LOAD_MODEL" | "PROCESS_IMAGE";
-    payload: any;
-  };
+self.onmessage = async (event: MessageEvent<WorkerRequest>) => {
+  const { type, payload } = event.data;
 
   switch (type) {
     case "LOAD_MODEL":
       try {
-        self.postMessage({ type: "PROGRESS", payload: 100 });
-
         const progressIntervals = [30, 50, 75];
         progressIntervals.forEach((progress, index) => {
           setTimeout(() => {
-            self.postMessage({ type: "PROGRESS", payload: progress });
+            self.postMessage({
+              type: "PROGRESS",
+              payload: progress,
+            } satisfies WorkerResponse);
           }, (index + 1) * 800);
         });
 

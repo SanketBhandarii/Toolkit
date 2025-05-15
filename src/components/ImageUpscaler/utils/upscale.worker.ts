@@ -11,10 +11,15 @@ self.onmessage = async (event) => {
     const result = await upscaler(imageUrl);
 
     self.postMessage({ success: true, result });
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const message =
+      error instanceof Error
+        ? error.message
+        : "Unexpected error during upscaling.";
+
     self.postMessage({
       success: false,
-      error: error?.message || "Unexpected error during upscaling.",
+      error: message,
     });
   }
 };

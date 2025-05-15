@@ -7,7 +7,7 @@ export const resizeImage = (
   maxHeight,
   compressQuality
 ) => {
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve) => {
     Resizer.imageFileResizer(
       file,
       maxWidth,

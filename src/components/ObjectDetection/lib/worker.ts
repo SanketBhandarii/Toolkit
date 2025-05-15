@@ -4,6 +4,7 @@ import {
   PipelineType,
   ProgressCallback,
   ObjectDetectionPipeline,
+  ObjectDetectionPipelineOutput,
 } from "@huggingface/transformers";
 
 env.allowLocalModels = false;
@@ -16,7 +17,7 @@ interface WorkerMessageData {
 interface WorkerResponse {
   status: "initiate" | "progress" | "ready" | "complete";
   progress?: number;
-  result?: any[];
+  result?: ObjectDetectionPipelineOutput[];
 }
 
 class Pipeline {

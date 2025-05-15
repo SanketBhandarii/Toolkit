@@ -5,7 +5,7 @@ declare module "*.worker.ts" {
   export default WebpackWorker;
 }
 
-declare module "*.ts" {
-  const content: any;
-  export default content;
+declare module "*.worker.ts" {
+  const worker: new () => Worker;
+  export default worker;
 }
