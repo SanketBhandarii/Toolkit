@@ -8,6 +8,17 @@ import {
 
 env.allowLocalModels = false;
 
+interface WorkerMessageData {
+  image?: string | ArrayBuffer | null;
+  initialize?: boolean;
+}
+
+interface WorkerResponse {
+  status: "initiate" | "progress" | "ready" | "complete";
+  progress?: number;
+  result?: any[];
+}
+
 class Pipeline {
   static task: PipelineType = "object-detection";
   static model = "Xenova/detr-resnet-50";
@@ -15,10 +26,16 @@ class Pipeline {
 
   static async getInstance(progress_callback?: ProgressCallback) {
     if (this.instance === null) {
+      // Signal initiation first
+      self.postMessage({ status: "initiate" } as WorkerResponse);
+
       const pipelineInstance = await pipeline(this.task, this.model, {
         progress_callback,
       });
       this.instance = pipelineInstance as ObjectDetectionPipeline;
+
+      // Signal ready when model is loaded
+      self.postMessage({ status: "ready" } as WorkerResponse);
     }
     return this.instance;
   }
@@ -26,14 +43,26 @@ class Pipeline {
 
 self.addEventListener(
   "message",
-  async (event: MessageEvent<{ image: string | ArrayBuffer | null }>) => {
-    const detector = await Pipeline.getInstance((x) => {
-      self.postMessage(x);
-    });
+  async (event: MessageEvent<WorkerMessageData>) => {
+    try {
+      // If initialization message was received
+      if (event.data.initialize) {
+        await Pipeline.getInstance((progressData) => {
+          self.postMessage(progressData);
+        });
+        return;
+      }
 
-    const result = await detector(event.data.image as string, {
-      percentage: true,
-    });
-    self.postMessage({ status: "complete", result });
+      // Process image if one was sent
+      if (event.data.image) {
+        const detector = await Pipeline.getInstance();
+        const result = await detector(event.data.image as string, {
+          percentage: true,
+        });
+        self.postMessage({ status: "complete", result });
+      }
+    } catch (error) {
+      console.error("Worker error:", error);
+    }
   }
 );

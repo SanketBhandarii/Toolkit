@@ -20,7 +20,7 @@ type DetectorMessage = {
 
 export function useDetector() {
   const [result, setResult] = useState<Detection[] | null>(null);
-  const [ready, setReady] = useState<boolean | null>(null);
+  const [ready, setReady] = useState<boolean>(false);
   const [progress, setProgress] = useState(0);
   const [status, setStatus] = useState("");
 
@@ -49,5 +49,18 @@ export function useDetector() {
     [worker]
   );
 
-  return { result, setResult, ready, progress, status, setStatus, start };
+  const initialize = useCallback(() => {
+    if (worker) worker.postMessage({ initialize: true });
+  }, [worker]);
+
+  return {
+    result,
+    setResult,
+    ready,
+    progress,
+    status,
+    setStatus,
+    start,
+    initialize,
+  };
 }

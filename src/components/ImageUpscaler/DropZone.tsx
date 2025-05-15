@@ -3,11 +3,11 @@
 import { useRef } from "react";
 import { UploadCloud } from "lucide-react";
 
-export default function DropZone({
-  onSelect,
-}: {
+type DropZoneProps = {
   onSelect: (file: File) => void;
-}) {
+};
+
+export default function DropZone({ onSelect }: DropZoneProps) {
   const ref = useRef<HTMLInputElement>(null);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {

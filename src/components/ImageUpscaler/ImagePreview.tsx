@@ -1,59 +1,35 @@
-import { useEffect, useState } from "react"
+"use client";
 
-export default function ImagePreview({
-    src,
-    factor,
-    original,
-}: {
-    src: string
-    factor: "2x" | "3x"
-    original: string
-}) {
-    const [sizes, setSizes] = useState<{ original: string, upscaled: string }>({
-        original: "",
-        upscaled: ""
-    })
+import { useEffect, useState } from "react";
 
-    useEffect(() => {
-        const img1 = new Image()
-        const img2 = new Image()
+type Props = {
+  factor: "2x" | "3x";
+  original: string;
+  upscale: string | null;
+};
 
-        img1.onload = () =>
-            setSizes(prev => ({ ...prev, original: `${img1.width} × ${img1.height}` }))
-        img2.onload = () =>
-            setSizes(prev => ({ ...prev, upscaled: `${img2.width} × ${img2.height}` }))
+export default function ImagePreview({ original, factor, upscale }: Props) {
+  const [size, setSize] = useState("");
 
-        img1.src = original
-        img2.src = src
-    }, [original, src])
+  useEffect(() => {
+    const img = new Image();
+    img.onload = () => {
+      setSize(`${img.width} × ${img.height}`);
+    };
+    img.src = upscale || original;
+  }, [original, upscale]);
 
-    return (
-        <div>
-            <p className="text-center text-sm text-gray-500 font-medium mb-2">
-                Original vs Upscaled ({factor})
-            </p>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="text-center">
-                    <p className="text-sm mb-1">
-                        Original <span className="text-gray-400">({sizes.original})</span>
-                    </p>
-                    <img
-                        src={original}
-                        alt="Original"
-                        className="rounded-lg object-contain w-full max-h-[350px]"
-                    />
-                </div>
-                <div className="text-center">
-                    <p className="text-sm mb-1">
-                        Upscaled <span className="text-gray-400">({sizes.upscaled})</span>
-                    </p>
-                    <img
-                        src={src}
-                        alt="Upscaled"
-                        className="rounded-lg object-contain w-full max-h-[350px]"
-                    />
-                </div>
-            </div>
-        </div>
-    )
+  return (
+    <div className="text-center">
+      <p className="text-sm font-medium mb-2">
+        {upscale ? `Upscaled (${factor})` : "Original"}{" "}
+        <span className="text-gray-400 text-xs">({size})</span>
+      </p>
+      <img
+        src={upscale || original}
+        alt={upscale ? "Upscaled" : "Original"}
+        className="rounded-lg object-contain w-full max-h-[350px]"
+      />
+    </div>
+  );
 }

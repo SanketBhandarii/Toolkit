@@ -1,120 +1,158 @@
 "use client";
 
 import { useState } from "react";
-import { Download, Upload } from "lucide-react";
-
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 import DropZone from "./DropZone";
 import ImagePreview from "./ImagePreview";
+import { Loader2 } from "lucide-react";
 import UpscaleOptions from "./UpscaleOptions";
+import { runUpscaleWorker } from "./hooks/useUpscale";
+
+// File size limit in MB (let's say 5MB)
+const MAX_FILE_SIZE_MB = 5;
 
 export default function ImageUpscaler() {
-  const [preview, setPreview] = useState<string | null>(null);
-  const [factor, setFactor] = useState<"2x" | "3x">("2x");
-  const [upscaled, setUpscaled] = useState<string | null>(null);
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imageUrl, setImageUrl] = useState<string | null>(null);
+  const [upscaledUrl, setUpscaledUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [upscaleFactor, setUpscaleFactor] = useState<"2x" | "3x">("2x");
 
-  const handleUpload = (file: File) => {
-    const url = URL.createObjectURL(file);
-    setPreview(url);
-    setUpscaled(null);
+  // Check if file size is within the allowed limit (in MB)
+  const isFileSizeValid = (file: File) => {
+    const fileSizeMB = file.size / (1024 * 1024); // Convert size to MB
+    return fileSizeMB <= MAX_FILE_SIZE_MB;
   };
 
-  const handleUpscale = () => {
-    if (!preview) return;
+  const handleImageSelect = (file: File) => {
+    if (!isFileSizeValid(file)) {
+      setErrorMessage(
+        `File size is too large. Maximum allowed size is ${MAX_FILE_SIZE_MB}MB.`
+      );
+      setImageFile(null);
+      setImageUrl(null);
+      setUpscaledUrl(null);
+      return;
+    }
+
+    setImageFile(file);
+    setImageUrl(URL.createObjectURL(file));
+    setUpscaledUrl(null);
+    setErrorMessage(null);
+  };
+
+  const handleUpscale = async () => {
+    if (!imageUrl) return;
+
     setLoading(true);
-
-    const img = new Image();
-    img.onload = () => {
-      const scale = parseInt(factor);
-      const canvas = document.createElement("canvas");
-      canvas.width = img.width * scale;
-      canvas.height = img.height * scale;
-      canvas
-        .getContext("2d")
-        ?.drawImage(img, 0, 0, canvas.width, canvas.height);
-
-      setUpscaled(canvas.toDataURL("image/png"));
+    try {
+      const upscaledDataUrl = await runUpscaleWorker(imageUrl, upscaleFactor);
+      setUpscaledUrl(upscaledDataUrl);
+    } catch (error) {
+      console.error("Upscaling failed:", error);
+      setErrorMessage(
+        "Upscaling failed: " +
+          (error instanceof Error ? error.message : String(error))
+      );
+    } finally {
       setLoading(false);
-    };
-    img.src = preview;
+    }
   };
 
-  const handleDownload = () => {
-    if (!upscaled) return;
-    const a = document.createElement("a");
-    a.href = upscaled;
-    a.download = `upscaled_${factor}.png`;
-    a.click();
-  };
-
-  const handleReupload = () => {
-    setPreview(null);
-    setUpscaled(null);
+  const handleReset = () => {
+    setLoading(false)
+    setImageFile(null);
+    setImageUrl(null);
+    setUpscaledUrl(null);
+    setErrorMessage(null);
+    setUpscaleFactor("2x");
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center p-4">
-      <div className="text-center mb-6 mt-10">
-        <h1 className="text-3xl font-bold mb-1">Image Upscaler</h1>
-        <p className="text-gray-400 font-semibold">
-          Upload an image and upscale it to 2x or 3x the original size.
-        </p>
-      </div>
+    <main className="flex min-h-screen items-center justify-center bg-gray-50 p-4">
+      <div className="w-full max-w-5xl p-6 space-y-6 shadow-lg rounded-2xl bg-white">
+        <div>
+          <h1 className="text-3xl font-bold">Image Upscaling</h1>
+          <p className="text-muted-foreground text-sm">
+            Upload an image and upscale it directly in your browser.
+          </p>
+        </div>
 
-      <Card className="p-5 w-full max-w-md sm:max-w-2xl border border-gray-300">
-        <div className="space-y-6">
-          {!preview ? (
-            <DropZone onSelect={handleUpload} />
-          ) : (
-            <ImagePreview
-              src={upscaled ?? preview}
-              original={preview}
-              factor={factor}
-            />
-          )}
+        {errorMessage && (
+          <div className="p-4 bg-red-50 text-red-700 rounded">
+            <p>{errorMessage}</p>
+          </div>
+        )}
 
-          <UpscaleOptions
-            value={factor}
-            onChange={(v) => {
-              setFactor(v);
-              setUpscaled(null);
-            }}
-          />
+        {!imageUrl && <DropZone onSelect={handleImageSelect} />}
 
-          <div className="flex flex-col items-center gap-3">
-            <Button
-              disabled={loading}
-              className="w-full sm:w-[80%] bg-neutral-400 hover:bg-neutral-500 text-white cursor-pointer"
-              onClick={handleUpscale}
-              suppressHydrationWarning
-            >
-              {loading ? "Upscaling..." : "Upscale Image"}
-            </Button>
-
-            <Button
-              className="w-full sm:w-[80%] bg-neutral-100 text-gray-700 hover:bg-neutral-200 cursor-pointer"
-              onClick={handleReupload}
-              suppressHydrationWarning
-            >
-              <Upload className="mr-2" />
-              Reupload
-            </Button>
-
-            {upscaled && (
-              <Button
-                className="w-full sm:w-[80%] bg-neutral-400 hover:bg-neutral-500 text-white cursor-pointer"
-                onClick={handleDownload}
-                suppressHydrationWarning
-              >
-                <Download className="w-4 h-4 mr-2" />
-                Save
-              </Button>
+        {imageUrl && (
+          <div className="flex flex-col md:flex-row justify-center items-center gap-4 bg-slate-50 rounded-lg p-6">
+            <div className="w-full md:w-[45%]">
+              <ImagePreview
+                original={imageUrl}
+                factor={upscaleFactor}
+                upscale={null}
+              />
+            </div>
+            {upscaledUrl && (
+              <div className="w-full md:w-[45%]">
+                <ImagePreview
+                  original={imageUrl}
+                  factor={upscaleFactor}
+                  upscale={upscaledUrl}
+                />
+              </div>
             )}
           </div>
-        </div>
-      </Card>
-    </div>
+        )}
+
+        {imageFile && (
+          <div className="space-y-4">
+            <UpscaleOptions
+              value={upscaleFactor}
+              loading={loading}
+              onChange={(val) => setUpscaleFactor(val)}
+            />
+
+            <div className="flex gap-4 flex-wrap">
+              <Button
+                onClick={handleUpscale}
+                disabled={loading}
+                className="cursor-pointer"
+              >
+                {loading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Upscaling...(Cooking)
+                  </>
+                ) : (
+                  "Upscale Image"
+                )}
+              </Button>
+
+              <Button
+                variant="secondary"
+                onClick={handleReset}
+                className="cursor-pointer"
+              >
+                Reset
+              </Button>
+
+              {upscaledUrl && (
+                <a
+                  href={upscaledUrl}
+                  download="upscaled-image.png"
+                  className="cursor-pointer inline-flex items-center rounded-md text-blue-400 border-blue-400 border px-4 py-2 text-sm font-medium shadow hover:bg-blue-50 transition"
+                >
+                  Download Upscaled Image
+                </a>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
+    </main>
   );
 }

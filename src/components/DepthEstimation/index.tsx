@@ -7,63 +7,52 @@ import { ImagePreview } from "./ImagePreview";
 import { DepthMapViewer } from "./DepthMapViewer";
 import { Loader2 } from "lucide-react";
 
-import { loadDepthEstimator } from "./utils/loadDepthEstimator";
-
 export const DepthEstimatorController = () => {
-  type DepthEstimator = (input: string) => Promise<{
-    depth: {
-      data: Uint8ClampedArray;
-      width: number;
-      height: number;
-    };
-  }>;
-
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [depthUrl, setDepthUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const [loadingModel, setLoadingModel] = useState(true);
+  const [modelLoading, setModelLoading] = useState(true);
+  const [loadingProgress, setLoadingProgress] = useState(0);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const pipelineRef = useRef<DepthEstimator | null>(null);
+  const workerRef = useRef<Worker | null>(null);
 
   useEffect(() => {
-    const loadModel = async () => {
-      try {
-        setLoadingModel(true);
-        const depth_estimator = await loadDepthEstimator();
-        pipelineRef.current = depth_estimator as DepthEstimator;
-        setErrorMessage(null);
-      } catch (error) {
-        console.error("Model loading failed:", error);
-        setErrorMessage(
-          "Could not load model: " +
-            (error instanceof Error ? error.message : String(error))
-        );
-      } finally {
-        setLoadingModel(false);
-      }
-    };
+    if (typeof window !== 'undefined') {
+      workerRef.current = new Worker(new URL('./utils/depth-worker.ts', import.meta.url));
+      
+      workerRef.current.onmessage = (event) => {
+        const { type, payload } = event.data;
+        
+        switch (type) {
+          case 'PROGRESS':
+            setLoadingProgress(payload);
+            break;
+          case 'MODEL_LOADED':
+            setModelLoading(false);
+            break;
+          case 'RESULT':
+            processDepthResult(payload);
+            break;
+          case 'ERROR':
+            setErrorMessage(payload);
+            setModelLoading(false);
+            setLoading(false);
+            break;
+        }
+      };
+      
+      workerRef.current.postMessage({ type: 'LOAD_MODEL' });
+    }
 
-    loadModel();
+    return () => {
+      workerRef.current?.terminate();
+    };
   }, []);
 
-  const handleImageSelect = (file: File) => {
-    setImageFile(file);
-    setImageUrl(URL.createObjectURL(file));
-    setDepthUrl(null);
-    setErrorMessage(null);
-  };
-
-  const handleEstimate = async () => {
-    if (!imageFile || !pipelineRef.current) return;
-
-    setLoading(true);
+  const processDepthResult = (raw: { data: Uint8ClampedArray; width: number; height: number }) => {
     try {
-      const objectURL = URL.createObjectURL(imageFile);
-      const output = await pipelineRef.current(objectURL);
-
-      const raw = output.depth;
       const depthData = raw.data;
       const width = raw.width;
       const height = raw.height;
@@ -92,13 +81,31 @@ export const DepthEstimatorController = () => {
       ctx.putImageData(imageData, 0, 0);
       const base64 = canvas.toDataURL("image/png");
       setDepthUrl(base64);
+      setLoading(false);
+    } catch (error) {
+      console.error("Processing depth result failed:", error);
+      setErrorMessage(error instanceof Error ? error.message : String(error));
+      setLoading(false);
+    }
+  };
+
+  const handleImageSelect = (file: File) => {
+    setImageFile(file);
+    setImageUrl(URL.createObjectURL(file));
+    setDepthUrl(null);
+    setErrorMessage(null);
+  };
+
+  const handleEstimate = async () => {
+    if (!imageFile || !workerRef.current) return;
+
+    setLoading(true);
+    try {
+      const objectURL = URL.createObjectURL(imageFile);
+      workerRef.current.postMessage({ type: 'PROCESS_IMAGE', payload: objectURL });
     } catch (error) {
       console.error("Estimation failed:", error);
-      setErrorMessage(
-        "Failed to estimate depth: " +
-          (error instanceof Error ? error.message : String(error))
-      );
-    } finally {
+      setErrorMessage(error instanceof Error ? error.message : String(error));
       setLoading(false);
     }
   };
@@ -120,10 +127,16 @@ export const DepthEstimatorController = () => {
           </p>
         </div>
 
-        {loadingModel && (
+        {modelLoading && (
           <div className="space-y-2">
-            <div className="text-green-500 text-sm font-medium">
-              Loading depth estimation model...
+            <div className="w-full bg-gray-200 rounded-full h-2.5">
+              <div 
+                className="bg-green-600 h-2.5 rounded-full transition-all duration-300" 
+                style={{ width: `${loadingProgress}%` }}
+              ></div>
+            </div>
+            <div className="text-sm text-gray-500">
+              Loading model: {loadingProgress}%
             </div>
           </div>
         )}
@@ -153,7 +166,7 @@ export const DepthEstimatorController = () => {
           <div className="space-x-4 mt-4">
             <Button
               onClick={handleEstimate}
-              disabled={loadingModel || loading}
+              disabled={modelLoading || loading}
               className="cursor-pointer"
             >
               {loading ? (
