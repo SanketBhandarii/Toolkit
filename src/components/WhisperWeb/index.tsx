@@ -21,7 +21,6 @@ const Home = () => {
           audioFile={audioFile}
           setAudioFile={setAudioFile}
           setSendAudio={setSendAudio}
-          transcription={transcription}
           processing={processing}
           setProcessing={setProcessing}
         />

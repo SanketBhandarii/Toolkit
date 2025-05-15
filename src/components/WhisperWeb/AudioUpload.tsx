@@ -7,14 +7,12 @@ const AudioUpload = ({
   audioFile,
   setAudioFile,
   setSendAudio,
-  transcription,
   processing,
   setProcessing,
 }: {
   audioFile: File | null;
   setAudioFile: (file: File) => void;
   setSendAudio: (sendAudio: boolean) => void;
-  transcription: string;
   processing: boolean;
   setProcessing: (processing: boolean) => void;
 }) => {
