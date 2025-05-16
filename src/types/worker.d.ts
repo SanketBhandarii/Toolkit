@@ -4,8 +4,3 @@ declare module "*.worker.ts" {
   }
   export default WebpackWorker;
 }
-
-declare module "*.worker.ts" {
-  const worker: new () => Worker;
-  export default worker;
-}

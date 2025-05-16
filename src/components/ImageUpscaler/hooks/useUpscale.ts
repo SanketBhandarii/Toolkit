@@ -24,8 +24,6 @@ export function runUpscaleWorker(
           reject(new Error("Failed to convert image to data URL: " + err));
         }
       } else {
-        console.log("ASDFASDF", error);
-
         reject(new Error(error));
       }
 

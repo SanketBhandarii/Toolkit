@@ -35,9 +35,7 @@ export default function ImageToText() {
     reader.onload = async () => {
       try {
         const imgData = reader.result as string;
-        const { data } = await Tesseract.recognize(imgData, "eng", {
-          logger: (m) => console.log(m),
-        });
+        const { data } = await Tesseract.recognize(imgData, "eng");
         setText(data.text || "No text found");
       } catch (err) {
         console.error("OCR error:", err);

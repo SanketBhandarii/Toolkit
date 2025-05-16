@@ -15,6 +15,11 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 const tools = [
   {
+    name: "Text Summarizer",
+    description: "Summarize your long paragraph",
+    href: "/textsummarizer",
+  },
+  {
     name: "Image To Text",
     description: "Read text from the image.",
     href: "/imagetotext",
