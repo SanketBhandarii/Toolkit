@@ -1,7 +1,6 @@
 "use client";
 
 import { useRef } from "react";
-import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { UploadIcon } from "lucide-react";
 
