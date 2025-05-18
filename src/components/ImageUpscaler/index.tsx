@@ -70,11 +70,11 @@ export default function ImageUpscaler() {
   };
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-gray-50 p-4">
-      <div className="w-full max-w-5xl p-6 space-y-6 shadow-lg rounded-2xl bg-white">
+    <main className="flex min-h-screen items-center justify-center bg-neutral-900 p-4">
+      <div className="w-full max-w-5xl p-6 space-y-6 shadow-lg rounded-2xl bg-neutral-800">
         <div>
-          <h1 className="text-3xl font-bold">Image Upscaling</h1>
-          <p className="text-muted-foreground text-sm">
+          <h1 className="text-3xl font-bold text-gray-200">Image Upscaling</h1>
+          <p className="text-muted-foreground text-sm text-gray-200 mt-3">
             Upload an image and upscale it directly in your browser.
           </p>
         </div>
@@ -88,7 +88,7 @@ export default function ImageUpscaler() {
         {!imageUrl && <DropZone onSelect={handleImageSelect} />}
 
         {imageUrl && (
-          <div className="flex flex-col md:flex-row justify-center items-center gap-4 bg-slate-50 rounded-lg p-6">
+          <div className="flex flex-col md:flex-row justify-center items-center gap-4 border border-slate-600 rounded-lg p-6">
             <div className="w-full md:w-[45%]">
               <ImagePreview
                 original={imageUrl}
@@ -120,7 +120,7 @@ export default function ImageUpscaler() {
               <Button
                 onClick={handleUpscale}
                 disabled={loading}
-                className="cursor-pointer"
+                className="cursor-pointer bg-neutral-700 text-gray-200"
               >
                 {loading ? (
                   <>
@@ -135,7 +135,7 @@ export default function ImageUpscaler() {
               <Button
                 variant="secondary"
                 onClick={handleReset}
-                className="cursor-pointer"
+                className="cursor-pointer bg-neutral-700 text-gray-200"
               >
                 Reset
               </Button>
@@ -144,7 +144,7 @@ export default function ImageUpscaler() {
                 <a
                   href={upscaledUrl}
                   download="upscaled-image.png"
-                  className="cursor-pointer inline-flex items-center rounded-md text-blue-400 border-blue-400 border px-4 py-2 text-sm font-medium shadow hover:bg-blue-50 transition"
+                  className="cursor-pointer inline-flex items-center rounded-md text-blue-400 border-blue-400 border px-4 py-2 text-sm"
                 >
                   Download Upscaled Image
                 </a>

@@ -50,7 +50,7 @@ export default function ImageUploader({ onImageSelected }: ImageUploaderProps) {
 
   return (
     <div
-      className={`border-2 cursor-pointer border-dashed rounded-lg p-8 text-center ${
+      className={`border-2 cursor-pointer border-dashed border-slate-500 rounded-lg p-8 text-center ${
         dragActive ? "border-sky-500 bg-sky-50" : "border-gray-300"
       }`}
       onDragEnter={handleDrag}
@@ -68,7 +68,7 @@ export default function ImageUploader({ onImageSelected }: ImageUploaderProps) {
       />
       <div className="flex flex-col items-center">
         <Upload className="h-12 w-12 text-gray-400 mb-4" />
-        <p className="text-lg font-medium mb-1">
+        <p className="text-lg font-medium mb-1 text-gray-300">
           Click or drag image to upload
         </p>
         <p className="text-sm text-gray-500">

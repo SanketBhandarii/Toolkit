@@ -13,7 +13,7 @@ export const DepthMapViewer = ({ depthUrl }: Props) => (
       width={0}
       height={0}
     />
-    <p className="text-center mt-1 text-xs text-muted-foreground">
+    <p className="text-center mt-2 text-xs text-muted-foreground text-gray-200">
       Predicted Depth Map
     </p>
   </div>

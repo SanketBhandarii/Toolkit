@@ -32,7 +32,9 @@ export default function ImageSegmenter() {
     if (!model || !imageRef.current || !canvasRef.current) return;
     setLoading(true);
 
-    const { segmentationMap, width, height } = await model.segment(imageRef.current);
+    const { segmentationMap, width, height } = await model.segment(
+      imageRef.current
+    );
     const ctx = canvasRef.current.getContext("2d");
     canvasRef.current.width = width;
     canvasRef.current.height = height;
@@ -87,13 +89,15 @@ export default function ImageSegmenter() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 p-6 flex justify-center items-center">
+    <div className="min-h-screen bg-neutral-900 p-6 flex justify-center items-center">
       <Card className="w-full max-w-7xl shadow-lg border-none">
         <CardContent className="p-6">
-          <h2 className="text-3xl font-bold text-center mb-8">AI Image Segmenter</h2>
+          <h2 className="text-3xl font-bold text-center text-gray-200 mb-8">
+            AI Image Segmenter
+          </h2>
 
           {!model ? (
-            <div className="flex justify-center items-center py-12">
+            <div className="flex justify-center items-center py-12 text-gray-200">
               <Loader2 className="h-6 w-6 animate-spin mr-2" />
               <span>Loading model...</span>
             </div>
@@ -111,18 +115,30 @@ export default function ImageSegmenter() {
                   />
                 </div>
                 <div className="flex flex-wrap gap-4 justify-center">
-                  <Button onClick={handleClear} variant="outline">
+                  <Button
+                    onClick={handleClear}
+                    variant="outline"
+                    className="bg-neutral-700 text-gray-200 border-0 cursor-pointer"
+                  >
                     <Trash2 className="h-4 w-4 mr-2" />
                     Start Over
                   </Button>
-                  <Button onClick={handleSegment} disabled={loading}>
+                  <Button
+                    onClick={handleSegment}
+                    disabled={loading}
+                    className="bg-neutral-700 text-white cursor-pointer"
+                  >
                     {loading ? (
-                      <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                    ) : null}
-                    Segment
+                      <Loader2 className="h-4 w-4 animate-spin mr-2 text-gray-200" />
+                    ) : (
+                      "Segment"
+                    )}
                   </Button>
                   {segments.length > 0 && (
-                    <Button onClick={handleDownload}>
+                    <Button
+                      onClick={handleDownload}
+                      className="bg-neutral-700 text-gray-200 cursor-pointer"
+                    >
                       Download
                     </Button>
                   )}
@@ -130,8 +146,15 @@ export default function ImageSegmenter() {
               </div>
               <div className="grid grid-cols-2 gap-4">
                 {segments.map((seg, i) => (
-                  <div key={i} className="border rounded overflow-hidden shadow-sm bg-white">
-                    <img src={seg.url} alt={`Segment ${i}`} className="w-full object-contain max-h-56" />
+                  <div
+                    key={i}
+                    className="border border-slate-600 rounded overflow-hidden shadow-sm"
+                  >
+                    <img
+                      src={seg.url}
+                      alt={`Segment ${i}`}
+                      className="w-full object-contain max-h-56"
+                    />
                   </div>
                 ))}
               </div>

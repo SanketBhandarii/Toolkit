@@ -12,6 +12,7 @@ import {
 import { Label } from "../ui/label";
 import { Button } from "../ui/button";
 import { getSpeech } from "./utils/getSpeech";
+import "./styles.css";
 
 type Status = "idle" | "generating" | "speaking";
 
@@ -45,18 +46,18 @@ const Container = () => {
   };
 
   return (
-    <div className="bg-white drop-shadow-xl border-2 border-neutral-200 rounded-lg p-6 w-full max-w-2xl mx-auto">
-      <h1 className="font-semibold text-2xl text-center text-neutral-700">
+    <div className="bg-neutral-800 drop-shadow-xl rounded-lg p-6 w-full max-w-2xl mx-auto">
+      <h1 className="font-semibold text-2xl text-center text-gray-300">
         In Browser Text to Speech
       </h1>
 
       <div className="mt-4">
-        <Label className="text-sm text-neutral-500">Write your text here</Label>
+        <Label className="text-sm text-gray-300">Write your text here</Label>
         <Textarea
           value={text}
           onChange={(e) => setText(e.target.value)}
           placeholder="Type your message here."
-          className="border-neutral-300 mt-2 outline-none resize-none min-h-[100px] max-h-[250px] overflow-auto"
+          className="border-neutral-500 text-gray-300 mt-2 outline-none resize-none min-h-[100px] max-h-[250px] overflow-auto textarea"
           maxLength={MAX_CHARS}
         />
         <div className="text-right text-xs text-neutral-500 mt-1">
@@ -65,15 +66,15 @@ const Container = () => {
       </div>
 
       <Select value={voice} onValueChange={setVoice}>
-        <SelectTrigger className="w-[180px] cursor-pointer border-neutral-300 mt-4">
+        <SelectTrigger className="w-[180px] cursor-pointer textarea border-neutral-500 text-white mt-4">
           <SelectValue>{voice}</SelectValue>
         </SelectTrigger>
-        <SelectContent className="border-neutral-300 bg-white">
+        <SelectContent className="bg-neutral-800 border-neutral-500">
           {["US-Male", "US-Female"].map((v) => (
             <SelectItem
               key={v}
               value={v}
-              className="cursor-pointer hover:bg-neutral-100"
+              className="cursor-pointer text-gray-300 hover:bg-neutral-700"
             >
               {v}
             </SelectItem>
@@ -84,13 +85,7 @@ const Container = () => {
       <Button
         onClick={handleGenerateSpeech}
         disabled={status !== "idle" || !text.trim()}
-        className={`mt-6 text-white cursor-pointer w-full sm:w-auto ${
-          status === "generating"
-            ? "bg-yellow-500"
-            : status === "speaking"
-            ? "bg-green-600"
-            : "bg-neutral-800"
-        }`}
+        className="mt-6 bg-neutral-700 text-white cursor-pointer w-full sm:w-auto"
       >
         {status === "generating"
           ? "Generating..."

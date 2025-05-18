@@ -64,7 +64,7 @@ export default function Dropzone({
     <>
       <div {...getRootProps({ className })}>
         <input {...getInputProps()} />
-        <div className="text-center text-gray-600">
+        <div className="text-center text-gray-400">
           {isDragActive
             ? "Drop the image here..."
             : "Drag & drop an image or click to upload"}

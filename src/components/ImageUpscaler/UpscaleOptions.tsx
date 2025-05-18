@@ -14,7 +14,7 @@ export default function UpscaleOptions({
 }) {
   return (
     <div className="flex flex-col items-center space-y-3">
-      <h3 className="text-lg font-semibold text-center">Upscale Factor</h3>
+      <h3 className="text-lg font-semibold text-center text-gray-300">Upscale Factor</h3>
       <RadioGroup
         value={value}
         disabled={loading}
@@ -22,7 +22,7 @@ export default function UpscaleOptions({
         className="flex gap-6"
       >
         {["2x", "3x"].map((val) => (
-          <div key={val} className="flex items-center space-x-2">
+          <div key={val} className="flex items-center space-x-2 text-gray-300">
             <RadioGroupItem value={val} id={val} className="cursor-pointer" />
             <Label htmlFor={val} className="font-medium cursor-pointer">
               {val}

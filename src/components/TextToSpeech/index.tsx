@@ -9,7 +9,7 @@ const TextToSpeech = () => {
   });
 
   return (
-    <div className="min-h-screen flex items-center justify-center">
+    <div className="min-h-screen bg-neutral-900 flex items-center justify-center">
       <HeavyComponent />
     </div>
   );

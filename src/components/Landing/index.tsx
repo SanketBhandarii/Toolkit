@@ -58,7 +58,7 @@ const tools = [
 
 const LandingPage = () => {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-zinc-900 via-neutral-900 to-zinc-800 text-white px-6 py-12">
+    <div className="min-h-screen bg-gradient-to-br bg-neutral-900 text-white px-6 py-12">
       <div className="text-center py-12">
         <motion.h1
           initial={{ opacity: 0, y: -40 }}
@@ -89,7 +89,7 @@ const LandingPage = () => {
             className="w-full"
           >
             <Link href={tool.href} prefetch={true}>
-              <Card className="bg-neutral-800 border border-neutral-700 hover:scale-[1.02] hover:border-teal-400 transition-transform duration-300 rounded-xl cursor-pointer shadow-lg">
+              <Card className="bg-neutral-800 border-0 hover:scale-[1.02] hover:border-teal-400 transition-transform duration-300 rounded-xl cursor-pointer shadow-lg">
                 <CardContent className="p-6">
                   <CardTitle className="text-xl font-semibold text-white mb-3">
                     {tool.name}

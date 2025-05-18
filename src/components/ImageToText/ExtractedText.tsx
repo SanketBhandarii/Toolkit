@@ -19,9 +19,9 @@ export default function ExtractedText({ text }: Props) {
   };
 
   return (
-    <Card className="p-4 space-y-1 bg-white border-none overflow-scroll">
+    <Card className="p-4 space-y-1 bg-gray-700 border-none">
       <div className="flex justify-between items-center">
-        <h3 className="font-semibold">Extracted Text</h3>
+        <h3 className="font-semibold text-gray-200">Extracted Text</h3>
         <Button
           variant="ghost"
           size="icon"
@@ -31,11 +31,11 @@ export default function ExtractedText({ text }: Props) {
           {copied ? (
             <p className="text-sm text-green-500 pr-2">Copied!</p>
           ) : (
-            <ClipboardCopyIcon className="w-4 h-4" />
+            <ClipboardCopyIcon className="w-4 h-4 text-slate-400" />
           )}
         </Button>
       </div>
-      <span className="whitespace-pre-wrap text-sm text-gray-800">
+      <span className="whitespace-pre-wrap text-sm text-gray-200">
         {text.trim()}
       </span>
     </Card>

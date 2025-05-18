@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
+import './styles.css'
 
 export const TextSummarizerController = () => {
   const workerRef = useRef<Worker | null>(null);
@@ -79,11 +80,11 @@ export const TextSummarizerController = () => {
   };
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-gray-50 p-6">
-      <div className="w-full max-w-4xl p-6 space-y-6 shadow-lg rounded-2xl bg-white">
+    <main className="flex min-h-screen items-center justify-center bg-neutral-900 p-6">
+      <div className="w-full max-w-4xl p-6 space-y-6 shadow-lg rounded-2xl bg-neutral-800">
         <div>
-          <h1 className="text-3xl font-bold">Text Summarization</h1>
-          <p className="text-muted-foreground text-sm">
+          <h1 className="text-3xl font-bold text-white">Text Summarization</h1>
+          <p className="text-muted-foreground text-sm text-white mt-3">
             Enter some text to get a concise summary using a browser-based ML
             model.
           </p>
@@ -93,7 +94,7 @@ export const TextSummarizerController = () => {
           <div className="space-y-2">
             <div className="w-full bg-gray-200 rounded-full h-2.5">
               <div
-                className="bg-blue-600 h-2.5 rounded-full transition-all duration-300"
+                className="bg-blue-400 h-2.5 rounded-full transition-all duration-300"
                 style={{ width: `${loadingProgress}%` }}
               ></div>
             </div>
@@ -104,7 +105,7 @@ export const TextSummarizerController = () => {
         )}
 
         {errorMessage && (
-          <div className="p-4 bg-red-50 text-red-700 rounded">
+          <div className="text-red-700 rounded">
             {errorMessage}
           </div>
         )}
@@ -113,14 +114,14 @@ export const TextSummarizerController = () => {
           value={inputText}
           onChange={(e) => setInputText(e.target.value)}
           placeholder="Paste or write your text here..."
-          className="w-full h-48 border border-gray-300 rounded-xl shadow-sm"
+          className="w-full h-48 border border-neutral-600 p-5 rounded-xl text-white placeholder:text-white  shadow-sm textarea"
         />
 
         <div className="flex gap-4">
           <Button
             onClick={handleSummarize}
             disabled={modelLoading || loading}
-            className="cursor-pointer"
+            className="cursor-pointer bg-neutral-700 text-white"
           >
             {loading ? (
               <>
@@ -134,14 +135,14 @@ export const TextSummarizerController = () => {
           <Button
             variant="secondary"
             onClick={handleReset}
-            className="cursor-pointer"
+            className="cursor-pointer text-white"
           >
             Reset
           </Button>
         </div>
 
         {summary && (
-          <div className="border border-yellow-400 bg-yellow-50 rounded-xl p-4">
+          <div className="bg-gray-700 text-gray-200 rounded-xl p-4">
             <h2 className="text-lg font-semibold mb-2">Summary:</h2>
             <p>{summary}</p>
           </div>

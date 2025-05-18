@@ -19,7 +19,7 @@ export const ImageUploader = ({ onImageSelect }: Props) => {
 
   return (
     <div>
-      <Button onClick={handleClick} className="border border-neutral-300 cursor-pointer hover:bg-neutral-100 transition-colors duration-300">
+      <Button onClick={handleClick} className="text-white bg-neutral-700 cursor-pointer hover:opacity-65 transition-opacity duration-300">
         Upload Image
       </Button>
       <input

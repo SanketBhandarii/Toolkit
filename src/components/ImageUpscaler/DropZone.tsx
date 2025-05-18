@@ -17,7 +17,7 @@ export default function DropZone({ onSelect }: DropZoneProps) {
 
   return (
     <div
-      className="border-2 border-dashed border-gray-300 rounded-lg p-12 text-center bg-gray-50 cursor-pointer"
+      className="border-2 border-dashed border-neutral-600 rounded-lg p-12 text-center bg-neutral-800 cursor-pointer"
       onClick={() => ref.current?.click()}
       onDragOver={(e) => e.preventDefault()}
       onDrop={(e) => {

@@ -19,7 +19,7 @@ export default function UploadDropzone({ onImageUpload }: Props) {
 
   return (
     <Card
-      className="p-20 border-dashed border-2 bg-white border-gray-300 text-center space-y-4 cursor-pointer"
+      className="p-20 border-dashed border-2 bg-neutral-800 border-gray-500 text-center cursor-pointer"
       onClick={() => fileInputRef.current?.click()}
     >
       <input
@@ -30,8 +30,8 @@ export default function UploadDropzone({ onImageUpload }: Props) {
         onChange={handleFileChange}
       />
       <UploadIcon className="mx-auto h-8 w-8 text-gray-500" />
-      <p className="text-gray-600">Select an image to extract text</p>
-      <Button className="cursor-pointer shadow-none">Upload Image</Button>
+      <p className="text-slate-200">Select an image to extract text</p>
+      <span className="cursor-pointer shadow-none text-slate-200 text-lg">Image-to-Text</span>
     </Card>
   );
 }

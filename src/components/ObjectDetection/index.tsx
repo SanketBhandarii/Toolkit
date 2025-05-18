@@ -17,18 +17,18 @@ export default function ObjectDetection() {
   }, []);
 
   return (
-    <section className="py-12 bg-gray-50 min-h-screen flex items-center justify-center">
+    <section className="py-12 bg-neutral-900 min-h-screen flex items-center justify-center">
       <div className="w-full max-w-4xl px-4">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
           <div className="text-center sm:text-left">
-            <h1 className="text-4xl font-extrabold text-gray-900">
+            <h1 className="text-4xl font-extrabold text-gray-200">
               Object Detection
             </h1>
           </div>
 
           <div className="text-center sm:text-right w-full sm:w-auto">
             {detector.ready ? (
-              <div className="flex items-center justify-center sm:justify-end gap-2 text-emerald-600">
+              <div className="flex items-center justify-center sm:justify-end gap-2 text-emerald-400">
                 <Check className="w-5 h-5" />
                 <span className="font-medium">Transformer Ready</span>
               </div>
@@ -62,7 +62,7 @@ export default function ObjectDetection() {
             detector={detector.start}
             result={detector.result}
             setResult={detector.setResult}
-            className="mt-10 rounded-2xl border-4 border-dashed border-gray-300 bg-white p-10 shadow-sm transition hover:border-emerald-500 hover:bg-emerald-50 cursor-pointer"
+            className="mt-10 rounded-2xl border-4 border-dashed border-neutral-500 bg-neutral-800 p-10 shadow-sm transition duration-300 hover:border-emerald-500 cursor-pointer"
           />
         </div>
       </div>

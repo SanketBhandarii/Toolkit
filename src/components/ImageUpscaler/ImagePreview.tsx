@@ -21,9 +21,9 @@ export default function ImagePreview({ original, factor, upscale }: Props) {
 
   return (
     <div className="text-center">
-      <p className="text-sm font-medium mb-2">
+      <p className="text-sm font-medium mb-2 text-gray-300">
         {upscale ? `Upscaled (${factor})` : "Original"}{" "}
-        <span className="text-gray-400 text-xs">({size})</span>
+        <span className="text-xs">({size})</span>
       </p>
       <img
         src={upscale || original}
