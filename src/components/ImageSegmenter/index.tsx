@@ -1,78 +1,92 @@
 "use client";
 
-import React, { useRef, useState, useEffect } from "react";
-import * as deeplab from "@tensorflow-models/deeplab";
-import "@tensorflow/tfjs";
+import React, { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Trash2, Loader2 } from "lucide-react";
+import { Trash2, Loader2, Download } from "lucide-react";
 import ImageUploader from "./ImageUploader";
 
 type Segment = { url: string };
-type DeepLabModelType = Awaited<ReturnType<typeof deeplab.load>>;
 
 export default function ImageSegmenter() {
-  const [model, setModel] = useState<DeepLabModelType | null>(null);
-  const [loading, setLoading] = useState(false);
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [segments, setSegments] = useState<Segment[]>([]);
-  const imageRef = useRef<HTMLImageElement>(null);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [modelLoading, setModelLoading] = useState(true);
+  const [progress, setProgress] = useState(0);
+  const [loading, setLoading] = useState(false);
+
+  const workerRef = useRef<Worker | null>(null);
+  const imageBlobRef = useRef<Blob | null>(null);
 
   useEffect(() => {
-    deeplab.load({ base: "pascal", quantizationBytes: 4 }).then(setModel);
+    workerRef.current = new Worker(
+      new URL("./utils/segmenter.worker.ts", import.meta.url),
+      { type: "module" }
+    );
+
+    workerRef.current.onmessage = (e) => {
+      const { type, payload } = e.data;
+
+      switch (type) {
+        case "PROGRESS":
+          setProgress(payload);
+          break;
+        case "MODEL_LOADED":
+          setModelLoading(false);
+          break;
+        case "SEGMENT_RESULT":
+          // Convert result to blob URL
+          const canvas = document.createElement("canvas");
+          const mask = payload.mask; // Assuming HuggingFace returns this
+          canvas.width = mask.width;
+          canvas.height = mask.height;
+
+          const ctx = canvas.getContext("2d");
+          if (!ctx) return;
+
+          const imageData = new ImageData(
+            new Uint8ClampedArray(mask.data),
+            mask.width,
+            mask.height
+          );
+
+          ctx.putImageData(imageData, 0, 0);
+
+          canvas.toBlob((blob) => {
+            if (blob) {
+              const url = URL.createObjectURL(blob);
+              setSegments([{ url }]);
+            }
+            setLoading(false);
+          });
+          break;
+        case "ERROR":
+          console.error("Segmentation error:", payload);
+          setLoading(false);
+          break;
+      }
+    };
+
+    workerRef.current.postMessage({ type: "LOAD_MODEL" });
+
+    return () => {
+      workerRef.current?.terminate();
+    };
   }, []);
 
-  const handleImageSelected = (_: File, url: string) => {
+  const handleImageSelected = (file: File, url: string) => {
+    imageBlobRef.current = file;
     setImageUrl(url);
     setSegments([]);
   };
 
-  const handleSegment = async () => {
-    if (!model || !imageRef.current || !canvasRef.current) return;
+  const handleSegment = () => {
+    if (!imageBlobRef.current || !workerRef.current) return;
     setLoading(true);
-
-    const { segmentationMap, width, height } = await model.segment(
-      imageRef.current
-    );
-    const ctx = canvasRef.current.getContext("2d");
-    canvasRef.current.width = width;
-    canvasRef.current.height = height;
-    ctx?.drawImage(imageRef.current, 0, 0, width, height);
-    const originalData = ctx?.getImageData(0, 0, width, height);
-
-    const validLabels = Array.from(new Set(segmentationMap)).filter(
-      (label) => label >= 0 && label < 21
-    );
-
-    const results: Segment[] = [];
-
-    for (const label of validLabels) {
-      const segCanvas = document.createElement("canvas");
-      segCanvas.width = width;
-      segCanvas.height = height;
-      const segCtx = segCanvas.getContext("2d");
-      const newImage = segCtx?.createImageData(width, height);
-      if (!newImage || !originalData) continue;
-
-      for (let i = 0; i < segmentationMap.length; i++) {
-        const offset = i * 4;
-        if (segmentationMap[i] === label) {
-          newImage.data[offset] = originalData.data[offset];
-          newImage.data[offset + 1] = originalData.data[offset + 1];
-          newImage.data[offset + 2] = originalData.data[offset + 2];
-          newImage.data[offset + 3] = 255;
-        } else {
-          newImage.data[offset + 3] = 0;
-        }
-      }
-
-      segCtx?.putImageData(newImage, 0, 0);
-      results.push({ url: segCanvas.toDataURL() });
-    }
-
-    setSegments(results);
-    setLoading(false);
+    workerRef.current.postMessage({
+      type: "SEGMENT_IMAGE",
+      payload: imageBlobRef.current,
+    });
   };
 
   const handleClear = () => {
@@ -96,10 +110,10 @@ export default function ImageSegmenter() {
             AI Image Segmenter
           </h2>
 
-          {!model ? (
+          {modelLoading ? (
             <div className="flex justify-center items-center py-12 text-gray-200">
               <Loader2 className="h-6 w-6 animate-spin mr-2" />
-              <span>Loading model...</span>
+              <span>Loading model... {progress}%</span>
             </div>
           ) : !imageUrl ? (
             <ImageUploader onImageSelected={handleImageSelected} />
@@ -108,7 +122,6 @@ export default function ImageSegmenter() {
               <div className="flex flex-col items-center space-y-4">
                 <div className="border rounded overflow-hidden">
                   <img
-                    ref={imageRef}
                     src={imageUrl}
                     alt="Uploaded"
                     className="max-w-full max-h-[500px] object-contain"
@@ -139,6 +152,7 @@ export default function ImageSegmenter() {
                       onClick={handleDownload}
                       className="bg-neutral-700 text-gray-200 cursor-pointer"
                     >
+                      <Download className="h-4 w-4 mr-2" />
                       Download
                     </Button>
                   )}
@@ -160,8 +174,6 @@ export default function ImageSegmenter() {
               </div>
             </div>
           )}
-
-          <canvas ref={canvasRef} style={{ display: "none" }} />
         </CardContent>
       </Card>
     </div>

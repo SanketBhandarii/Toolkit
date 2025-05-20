@@ -89,7 +89,7 @@ const LandingPage = () => {
             className="w-full"
           >
             <Link href={tool.href} prefetch={true}>
-              <Card className="bg-neutral-800 border-0 hover:scale-[1.02] hover:border-teal-400 transition-transform duration-300 rounded-xl cursor-pointer shadow-lg">
+              <Card className="bg-neutral-800 border-0 hover:opacity-70 transition-all duration-300 rounded-xl cursor-pointer shadow-lg">
                 <CardContent className="p-6">
                   <CardTitle className="text-xl font-semibold text-white mb-3">
                     {tool.name}

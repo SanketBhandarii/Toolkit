@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Textarea } from "../ui/textarea";
 import {
   Select,
@@ -11,36 +11,61 @@ import {
 } from "../ui/select";
 import { Label } from "../ui/label";
 import { Button } from "../ui/button";
-import { getSpeech } from "./utils/getSpeech";
 import "./styles.css";
 
-type Status = "idle" | "generating" | "speaking";
-
 const MAX_CHARS = 400;
+type Status = "idle" | "speaking";
 
 const Container = () => {
   const [text, setText] = useState("");
-  const [voice, setVoice] = useState("US-Male");
+  const [voices, setVoices] = useState<SpeechSynthesisVoice[]>([]);
+  const [selectedVoice, setSelectedVoice] = useState("");
   const [status, setStatus] = useState<Status>("idle");
+  const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
 
-  const handleGenerateSpeech = async () => {
-    if (!text.trim()) return;
-    setStatus("generating");
+  useEffect(() => {
+    const loadVoices = () => {
+      const allVoices = window.speechSynthesis.getVoices();
+      if (allVoices.length > 0) {
+        setVoices(allVoices);
+        if (!selectedVoice) setSelectedVoice(allVoices[0].name);
+      }
+    };
 
-    try {
-      const { audio, sampling_rate } = await getSpeech(text, voice);
-      const context = new AudioContext();
-      const buffer = context.createBuffer(1, audio.length, sampling_rate);
-      buffer.copyToChannel(audio, 0);
+    loadVoices();
+    window.speechSynthesis.onvoiceschanged = loadVoices;
+  }, [selectedVoice]);
 
-      const source = context.createBufferSource();
-      source.buffer = buffer;
-      source.connect(context.destination);
-      source.onended = () => setStatus("idle");
+  const handleSpeak = () => {
+    if (!text.trim() || status === "speaking") return;
 
+    window.speechSynthesis.cancel(); // cancel any ongoing
+
+    const utterance = new SpeechSynthesisUtterance(text);
+    const voice = voices.find((v) => v.name === selectedVoice);
+    if (voice) utterance.voice = voice;
+
+    utterance.onstart = () => {
       setStatus("speaking");
-      source.start();
-    } catch {
+    };
+
+    utterance.onend = () => {
+      setStatus("idle");
+    };
+
+    utterance.onerror = () => {
+      setStatus("idle");
+    };
+
+    utteranceRef.current = utterance;
+    window.speechSynthesis.speak(utterance);
+  };
+
+  const handleReset = () => {
+    if(!text.trim()) return;
+    if (window.confirm("This will reset the text. Continue?")) {
+      window.speechSynthesis.cancel();
+      setText("");
       setStatus("idle");
     }
   };
@@ -65,34 +90,40 @@ const Container = () => {
         </div>
       </div>
 
-      <Select value={voice} onValueChange={setVoice}>
-        <SelectTrigger className="w-[180px] cursor-pointer textarea border-neutral-500 text-white mt-4">
-          <SelectValue>{voice}</SelectValue>
+      <Label className="text-sm text-gray-300 mt-4 block">Select voice</Label>
+      <Select value={selectedVoice} onValueChange={setSelectedVoice}>
+        <SelectTrigger className="w-full sm:w-[300px] mt-2 border-neutral-500 text-white cursor-pointer">
+          <SelectValue placeholder="Select voice" />
         </SelectTrigger>
-        <SelectContent className="bg-neutral-800 border-neutral-500">
-          {["US-Male", "US-Female"].map((v) => (
+        <SelectContent className="bg-neutral-800 border border-neutral-600 max-h-[300px] overflow-y-auto">
+          {voices.map((v) => (
             <SelectItem
-              key={v}
-              value={v}
-              className="cursor-pointer text-gray-300 hover:bg-neutral-700"
+              key={v.name}
+              value={v.name}
+              className="text-gray-300 cursor-pointer"
             >
-              {v}
+              {v.name} — {v.lang}
             </SelectItem>
           ))}
         </SelectContent>
       </Select>
 
-      <Button
-        onClick={handleGenerateSpeech}
-        disabled={status !== "idle" || !text.trim()}
-        className="mt-6 bg-neutral-700 text-white cursor-pointer w-full sm:w-auto"
-      >
-        {status === "generating"
-          ? "Generating..."
-          : status === "speaking"
-          ? "Speaking..."
-          : "Generate"}
-      </Button>
+      <div className="flex gap-3 mt-6">
+        <Button
+          onClick={handleSpeak}
+          disabled={!text.trim() || status === "speaking"}
+          className="bg-neutral-700 text-white cursor-pointer w-full sm:w-auto"
+        >
+          {status === "speaking" ? "Speaking..." : "Speak"}
+        </Button>
+        <Button
+          onClick={handleReset}
+          variant="outline"
+          className="border border-neutral-600 text-gray-300 cursor-pointer"
+        >
+          Reset
+        </Button>
+      </div>
     </div>
   );
 };
