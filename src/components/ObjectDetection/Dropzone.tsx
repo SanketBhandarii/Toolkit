@@ -1,10 +1,11 @@
 import Image from "next/image";
-import { useCallback, useEffect, useState } from "react";
-import { useDropzone, FileRejection } from "react-dropzone";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { useDropzone } from "react-dropzone";
 import { cn } from "@/lib/utils";
 import { X } from "lucide-react";
+import html2canvas from "html2canvas";
 import BoundingBox from "./BoundingBox";
-import type { Detection } from "./hooks/useDetector"; // wherever it's located
+import type { Detection } from "./hooks/useDetector";
 
 type DropzoneProps = {
   status: string;
@@ -24,10 +25,10 @@ export default function Dropzone({
   className,
 }: DropzoneProps) {
   const [files, setFiles] = useState<(File & { preview: string })[]>([]);
-  const [rejected, setRejected] = useState<FileRejection[]>([]);
+  const imageRef = useRef<HTMLDivElement | null>(null);
 
   const onDrop = useCallback(
-    (accepted: File[], rejectedFiles: FileRejection[]) => {
+    (accepted: File[]) => {
       if (accepted.length) {
         const file = accepted[0];
         const preview = URL.createObjectURL(file);
@@ -39,15 +40,12 @@ export default function Dropzone({
         reader.onload = (e) => detector(e.target?.result ?? null);
         reader.readAsDataURL(file);
       }
-      if (rejectedFiles.length) setRejected(rejectedFiles);
     },
-    [detector, setResult, setStatus]
+    [detector, setStatus, setResult]
   );
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     accept: { "image/*": [] },
-    maxSize: 1024 * 1000,
-    maxFiles: 1,
     onDrop,
   });
 
@@ -57,8 +55,22 @@ export default function Dropzone({
 
   const remove = () => {
     setFiles([]);
-    setRejected([]);
+    setStatus("idle");
+    setResult(null);
   };
+
+  const downloadImage = async () => {
+    if (!imageRef.current) return;
+    const element = imageRef.current;
+    const canvas = await html2canvas(element, { backgroundColor: null });
+    element.classList.add("border-neutral-600");
+    const link = document.createElement("a");
+    link.download = "detected.png";
+    link.href = canvas.toDataURL("image/png");
+    link.click();
+  };
+
+  const uniqueLabels = [...new Set(result?.map((r) => r.label) || [])];
 
   return (
     <>
@@ -71,61 +83,67 @@ export default function Dropzone({
         </div>
       </div>
 
-      <section className="mt-6 space-y-6">
-        {files.length > 0 && (
-          <div className="relative mx-auto w-full max-w-sm overflow-hidden rounded-lg shadow">
-            <Image
-              src={files[0].preview}
-              alt={`Uploaded image: ${files[0].name ?? "unknown"}`}
-              width={500}
-              height={500}
-              onLoad={() => URL.revokeObjectURL(files[0].preview)}
-              className={cn(
-                "aspect-video w-full object-contain",
-                status !== "complete" && "animate-pulse"
+      {files.length > 0 && (
+        <div className="flex flex-col md:flex-row-reverse mt-4 gap-6 items-start">
+          {/* Image and bounding boxes */}
+          <div className="relative w-full md:w-[65%] max-w-[640px] overflow-hidden shadow">
+            <div className="relative w-full h-auto" ref={imageRef}>
+              <Image
+                src={files[0].preview}
+                alt={`Uploaded: ${files[0].name}`}
+                width={640}
+                height={480}
+                className={cn(
+                  "object-contain w-full bg-black",
+                  status !== "complete" && "animate-pulse"
+                )}
+              />
+              {result?.map((object, i) => (
+                <BoundingBox key={i} object={object} />
+              ))}
+              {status !== "complete" && (
+                <div className="absolute inset-0 flex items-center justify-center bg-black/70 text-white text-xs z-10">
+                  Detecting...
+                </div>
               )}
-            />
-            {result?.map((object, i) => (
-              <BoundingBox key={i} object={object} />
-            ))}
+              <button
+                onClick={remove}
+                className="absolute top-2 right-2 p-1 rounded-full bg-red-600 text-white hover:bg-red-700 z-20 cursor-pointer ui-only"
+              >
+                <X className="w-3 h-3" />
+              </button>
+            </div>
 
-            <button
-              onClick={remove}
-              className="absolute top-2 right-2 z-10 flex h-7 w-7 items-center justify-center rounded-full bg-rose-400 text-white cursor-pointer"
-            >
-              <X className="w-4 h-4" />
-            </button>
-            {status !== "complete" && (
-              <div className="absolute inset-0 flex items-center justify-center bg-black/60 text-white text-sm font-medium">
-                Detecting Objects...
+            {/* Download button */}
+            {status === "complete" && (
+              <div className="p-2">
+                <button
+                  onClick={downloadImage}
+                  className="text-sm bg-emerald-600 text-white px-3 py-1 rounded hover:bg-emerald-700 cursor-pointer"
+                >
+                  Download Image with Detections
+                </button>
               </div>
             )}
           </div>
-        )}
 
-        {rejected.length > 0 && (
-          <div className="rounded-lg border border-red-300 bg-red-50 p-4 shadow">
-            <ul className="text-sm text-red-500">
-              {rejected.map(({ file, errors }) => (
-                <li key={file.name}>
-                  <p className="font-medium">{file.name}</p>
-                  <ul className="list-disc pl-5 text-xs">
-                    {errors.map((e) => (
-                      <li key={e.code}>{e.message}</li>
-                    ))}
-                  </ul>
-                  <button
-                    onClick={remove}
-                    className="mt-2 text-xs text-red-600 cursor-pointer underline hover:text-red-800"
-                  >
-                    Upload Again
-                  </button>
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
-      </section>
+          {/* Labels box */}
+          {uniqueLabels.length > 0 && (
+            <div className="w-full md:w-[35%] bg-neutral-800 text-white text-sm rounded p-3">
+              <h3 className="font-semibold mb-2">
+                Detected Objects ({uniqueLabels.length})
+              </h3>
+              <ul className="space-y-1 text-xs">
+                {uniqueLabels.map((label, i) => (
+                  <li key={i} className="bg-neutral-700 px-2 py-1 rounded">
+                    {label}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </div>
+      )}
     </>
   );
 }
