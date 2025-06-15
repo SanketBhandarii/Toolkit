@@ -38,7 +38,7 @@ self.onmessage = async ({ data }: MessageEvent) => {
         );
         return;
     }
-  } catch (e: any) {
-    self.postMessage({ type: "ERROR", message: e?.message ?? "Unknown error" });
+  } catch (e) {
+    self.postMessage({ type: "ERROR", message: e ?? "Unknown error" });
   }
 };

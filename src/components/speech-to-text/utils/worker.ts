@@ -1,6 +1,6 @@
 import { Pipeline } from "@xenova/transformers";
 
-let model: any | null = null;
+let model: unknown | null = null;
 
 self.onmessage = async (e) => {
   try {
@@ -17,7 +17,7 @@ self.onmessage = async (e) => {
       const result = await model(e.data.audio);
       self.postMessage({ type: "RESULT", text: result.text });
     }
-  } catch (err: any) {
-    self.postMessage({ type: "ERROR", error: err.message });
+  } catch (err) {
+    self.postMessage({ type: "ERROR", error: err });
   }
 };
