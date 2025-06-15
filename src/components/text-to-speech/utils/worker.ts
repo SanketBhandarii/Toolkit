@@ -27,7 +27,7 @@ self.onmessage = async ({ data }: MessageEvent) => {
           channelData: [result.audio],
         });
 
-        self.postMessage(
+        (self as unknown as Worker).postMessage(
           {
             type: "SPEECH_RESULT",
             audio: result.audio,
