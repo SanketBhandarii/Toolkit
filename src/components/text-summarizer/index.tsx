@@ -17,7 +17,7 @@ export const TextSummarizerController = () => {
   useEffect(() => {
     if (typeof window !== "undefined") {
       workerRef.current = new Worker(
-        new URL("./utils/summarize.worker.js", import.meta.url),
+        new URL("./utils/summarize.worker.ts", import.meta.url),
         { type: "module" }
       );
 
@@ -88,7 +88,7 @@ export const TextSummarizerController = () => {
               {modelLoading && (
                 <div className="flex items-center justify-center space-x-3 p-4 bg-slate-800/80 rounded-xl backdrop-blur-sm">
                   <Loader2 className="h-5 w-5 animate-spin text-teal-400" />
-                  <span className="text-gray-300">Loading AI model...</span>
+                  <span className="text-gray-300">Loading AI model. This may take some time</span>
                 </div>
               )}
 
