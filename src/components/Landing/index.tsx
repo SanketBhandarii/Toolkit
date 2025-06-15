@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import React from "react";
-import { Terminal, Sparkles, ArrowRight, Zap } from "lucide-react";
+import {  Sparkles, ArrowRight } from "lucide-react";
 import { FaGithub } from "react-icons/fa";
 import { motion } from "framer-motion";
 import {

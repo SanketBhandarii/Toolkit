@@ -1,5 +1,3 @@
-import { Pipeline } from "@xenova/transformers";
-
 let model: unknown | null = null;
 
 self.onmessage = async (e) => {

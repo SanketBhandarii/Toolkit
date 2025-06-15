@@ -4,22 +4,11 @@ import { useEffect, useRef, useState } from "react";
 import RecorderControls from "@/components/speech-to-text/RecorderControls";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Loader2, Play, Upload, Mic, FileText, RotateCcw } from "lucide-react";
+import { Loader2, Play, Upload, RotateCcw } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import TranscriptList, {
   Transcript,
 } from "@/components/speech-to-text/TranscriptList";
-
-interface Props {
-  title: string;
-  updateCount: (appName: string) => Promise<number>;
-  initialCount: number;
-  addEmail: (
-    appName: string,
-    email: string,
-    comment: string | null
-  ) => Promise<void>;
-}
 
 export default function Transcriber() {
   const [text, setText] = useState("");
@@ -96,7 +85,7 @@ export default function Transcriber() {
       const rendered = await ctx.startRendering();
       audioDataRef.current = rendered.getChannelData(0);
       setAudioURL(URL.createObjectURL(file));
-    } catch (error) {
+    } catch {
       setErrorMessage("Error processing audio file");
     }
   };

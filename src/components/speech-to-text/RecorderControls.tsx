@@ -2,7 +2,7 @@
 
 import { useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Mic, Loader2, Square } from "lucide-react";
+import { Mic, Square } from "lucide-react";
 
 export default function RecorderControls({
   onRecord,
