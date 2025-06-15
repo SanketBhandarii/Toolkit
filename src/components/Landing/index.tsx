@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import React from "react";
-import {  Sparkles, ArrowRight } from "lucide-react";
+import { Sparkles, ArrowRight } from "lucide-react";
 import { FaGithub } from "react-icons/fa";
 import { motion } from "framer-motion";
 import {
@@ -13,12 +13,6 @@ import {
 import { Button } from "@/components/ui/button";
 
 const tools = [
-  {
-    name: "Text Summarizer",
-    description: "Transform lengthy paragraphs into summaries",
-    href: "/textsummarizer",
-    gradient: "from-blue-600 to-slate-600",
-  },
   {
     name: "Image To Text",
     description: "Extract and read text from any image instantly",
@@ -38,15 +32,21 @@ const tools = [
     gradient: "from-blue-600 to-slate-600",
   },
   {
+    name: "Speech to Text",
+    description: "Transcribe audio with advanced Whisper AI",
+    href: "/whisperweb",
+    gradient: "from-blue-600 to-slate-600",
+  },
+  {
     name: "Text to Speech",
     description: "Convert your text into natural-sounding voice",
     href: "/texttospeech",
     gradient: "from-blue-600 to-slate-600",
   },
   {
-    name: "Speech to Text",
-    description: "Transcribe audio with advanced Whisper AI",
-    href: "/whisperweb",
+    name: "Text Summarizer",
+    description: "Transform lengthy paragraphs into summaries",
+    href: "/textsummarizer",
     gradient: "from-blue-600 to-slate-600",
   },
 ];
@@ -136,7 +136,11 @@ const LandingPage = () => {
         </div>
         <div className="flex gap-3 justify-center text-lg items-center text-gray-400">
           Contributions Welcome
-          <Link href="https://github.com/SanketBhandarii/Toolkit" target="_blank" className="text-xl">
+          <Link
+            href="https://github.com/SanketBhandarii/Toolkit"
+            target="_blank"
+            className="text-xl"
+          >
             <FaGithub className="cursor-pointer" />
           </Link>
         </div>

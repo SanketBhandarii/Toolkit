@@ -2,8 +2,7 @@ import Image from "next/image";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useDropzone } from "react-dropzone";
 import { cn } from "@/lib/utils";
-import { X, Download, Upload } from "lucide-react";
-import html2canvas from "html2canvas";
+import { X, Upload } from "lucide-react";
 import BoundingBox from "./BoundingBox";
 import type { Detection } from "./hooks/useDetector";
 
