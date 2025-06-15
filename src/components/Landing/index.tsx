@@ -85,7 +85,7 @@ const LandingPage = () => {
             transition={{ duration: 0.8, delay: 0.4 }}
             className="text-lg md:text-xl lg:text-2xl text-gray-400 mb-8 max-w-3xl mx-auto leading-relaxed"
           >
-            No server. No api's. All processing in your browser
+            No server. No api&apos;s. All processing in your browser
           </motion.p>
 
           <motion.div
