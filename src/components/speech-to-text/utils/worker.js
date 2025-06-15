@@ -1,4 +1,4 @@
-let model: unknown | null = null;
+let model = null;
 
 self.onmessage = async (e) => {
   try {

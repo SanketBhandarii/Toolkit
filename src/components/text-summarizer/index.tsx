@@ -17,7 +17,7 @@ export const TextSummarizerController = () => {
   useEffect(() => {
     if (typeof window !== "undefined") {
       workerRef.current = new Worker(
-        new URL("./utils/summarize.worker.ts", import.meta.url),
+        new URL("./utils/summarize.worker.js", import.meta.url),
         { type: "module" }
       );
 

@@ -28,7 +28,7 @@ export default function Transcriber() {
   }, []);
 
   useEffect(() => {
-    const w = new Worker(new URL("./utils/worker.ts", import.meta.url), {
+    const w = new Worker(new URL("./utils/worker.js", import.meta.url), {
       type: "module",
     });
     w.postMessage({ type: "LOAD" });
