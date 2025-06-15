@@ -1,14 +1,8 @@
-import { SummarizationPipeline } from "@huggingface/transformers";
 import { loadSummarizer } from "./loadSummarizer";
 
-type WorkerMessage = {
-  status: "LOAD_MODEL" | "SUMMARIZE_TEXT";
-  payload?: string;
-};
+let summarizer= null;
 
-let summarizer: SummarizationPipeline | null = null;
-
-self.onmessage = async (event: MessageEvent<WorkerMessage>) => {
+self.onmessage = async (event) => {
   const { status, payload } = event.data;
 
   if (status === "LOAD_MODEL") {
@@ -25,7 +19,7 @@ self.onmessage = async (event: MessageEvent<WorkerMessage>) => {
       if (!summarizer) throw new Error("Model not loaded");
       if (!payload) throw new Error("No text provided");
 
-      const result = await (payload.trim(), {
+      const result = (payload.trim(), {
         max_length: 150,
         min_length: 50,
         do_sample: false,

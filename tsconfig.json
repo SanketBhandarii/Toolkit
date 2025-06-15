@@ -22,6 +22,6 @@
       "@/*": ["./src/*"]
     }
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "src/components/ImageUpscaler/utils/resizeImage.js", "src/components/speech-to-text/utils/worker.js", "src/components/text-summarizer/utils/summarize.worker.ts"],
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "src/components/ImageUpscaler/utils/resizeImage.js", "src/components/speech-to-text/utils/worker.js", "src/components/text-summarizer/utils/summarize.worker.js"],
   "exclude": ["node_modules"]
 }
