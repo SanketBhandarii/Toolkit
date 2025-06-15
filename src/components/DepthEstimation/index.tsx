@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { ImageUploader } from "./ImageUploader";
 import { ImagePreview } from "./ImagePreview";
 import { DepthMapViewer } from "./DepthMapViewer";
-import { Loader2 } from "lucide-react";
+import { Loader2, RotateCcw, Download, Image as ImageIcon } from "lucide-react";
 
 export const DepthEstimatorController = () => {
   const [imageFile, setImageFile] = useState<File | null>(null);
@@ -13,7 +13,6 @@ export const DepthEstimatorController = () => {
   const [depthUrl, setDepthUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [modelLoading, setModelLoading] = useState(true);
-  const [loadingProgress, setLoadingProgress] = useState(0);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const workerRef = useRef<Worker | null>(null);
@@ -28,9 +27,6 @@ export const DepthEstimatorController = () => {
         const { type, payload } = event.data;
 
         switch (type) {
-          case "PROGRESS":
-            setLoadingProgress(payload);
-            break;
           case "MODEL_LOADED":
             setModelLoading(false);
             break;
@@ -124,89 +120,103 @@ export const DepthEstimatorController = () => {
     setImageUrl(null);
     setDepthUrl(null);
     setErrorMessage(null);
-    location.reload()
+    location.reload();
   };
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-neutral-900 p-4">
-      <div className="w-full max-w-5xl p-6 space-y-6 shadow-lg rounded-2xl bg-neutral-800">
-        <div>
-          <h1 className="text-3xl font-bold text-white">Depth Estimation</h1>
-          <p className="text-muted-foreground text-sm text-white mt-3">
-            Upload an image and estimate its depth map directly in your browser.
-          </p>
-        </div>
-
-        {modelLoading && (
-          <div className="space-y-2">
-            <div className="w-full bg-gray-200 rounded-full h-2.5">
-              <div
-                className="bg-blue-400 h-2.5 rounded-full transition-all duration-300"
-                style={{ width: `${loadingProgress}%` }}
-              ></div>
+    <div className="min-h-screen pt-10 w-full bg-gradient-to-br from-[#012b28] via-black to-teal-950 overflow-hidden">
+      <div className="relative z-10 p-4 md:p-8">
+        <div className="w-full max-w-2xl lg:max-w-5xl mx-auto">
+          <div className="text-center mb-8 md:mb-12">
+            <div className="flex justify-center items-center mb-2">
+              <h1 className="text-2xl md:text-4xl font-bold bg-gradient-to-r from-teal-600 via-cyan-400 to-blue-400 bg-clip-text text-transparent">
+                Depth Estimation
+              </h1>
             </div>
-            <div className="text-sm text-gray-500">
-              Loading model: {loadingProgress}%
-            </div>
+            <p className="text-gray-400 text-sm md:text-lg">
+              Upload an image and estimate its depth map directly in your
+              browser
+            </p>
           </div>
-        )}
 
-        {errorMessage && (
-          <div className="p-4 bg-red-50 text-red-700 rounded">
-            <p>{errorMessage}</p>
-          </div>
-        )}
-
-        <ImageUploader onImageSelect={handleImageSelect} />
-
-        {imageUrl && (
-          <div className="grid md:grid-cols-2 mt-4 border border-gray-600 rounded-lg">
-            <div className="w-[70%] mx-auto overflow-hidden py-5">
-              <ImagePreview imageUrl={imageUrl} />
-            </div>
-            {depthUrl && (
-              <div className="w-[70%] mx-auto overflow-hidden py-5">
-                <DepthMapViewer depthUrl={depthUrl} />
-              </div>
-            )}
-          </div>
-        )}
-
-        {imageFile && (
-          <div className="space-x-4 mt-4">
-            <Button
-              onClick={handleEstimate}
-              disabled={modelLoading || loading}
-              className="text-white bg-neutral-700 cursor-pointer hover:opacity-65 transition-opacity duration-300"
-            >
-              {loading ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Estimating...
-                </>
-              ) : (
-                "Estimate Depth"
+          <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-xl border border-slate-700/50 rounded-2xl md:rounded-3xl p-4 md:p-8 shadow-2xl">
+            <div className="space-y-4 md:space-y-6">
+              {modelLoading && (
+                <div className="flex items-center justify-center space-x-3 p-4 bg-slate-800/80 rounded-xl backdrop-blur-sm">
+                  <Loader2 className="h-5 w-5 animate-spin text-teal-400" />
+                  <span className="text-gray-300">Loading AI model</span>
+                </div>
               )}
-            </Button>
-            <Button
-              variant="secondary"
-              onClick={handleReset}
-              className="cursor-pointer text-gray-200"
-            >
-              Reset
-            </Button>
-            {depthUrl && (
-              <a
-                href={depthUrl}
-                download="depth-map.png"
-                className="cursor-pointer inline-flex items-center rounded-md text-blue-400 border-blue-400 border px-4 py-2 text-sm font-medium"
-              >
-                Download Depth Map
-              </a>
-            )}
+
+              {errorMessage && (
+                <div className="text-red-400 bg-red-900/20 p-3 rounded-xl border border-red-800/50 backdrop-blur-sm">
+                  {errorMessage}
+                </div>
+              )}
+
+              <div className="bg-slate-900/80 border border-slate-600/50 rounded-xl p-4 backdrop-blur-sm">
+                <ImageUploader onImageSelect={handleImageSelect} />
+              </div>
+
+              {imageUrl && (
+                <div className="grid md:grid-cols-2 gap-4 bg-slate-900/50 border border-slate-600/50 rounded-xl p-4 backdrop-blur-sm">
+                  <div>
+                    <ImagePreview imageUrl={imageUrl} />
+                  </div>
+                  {depthUrl && (
+                    <div>
+                      <DepthMapViewer depthUrl={depthUrl} />
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {imageFile && (
+                <div className="flex justify-center pt-2 md:pt-4">
+                  <div className="flex gap-3 flex-wrap justify-center">
+                    <Button
+                      onClick={handleEstimate}
+                      disabled={modelLoading || loading}
+                      className="h-12 bg-gradient-to-r from-teal-600 to-blue-600 disabled:from-slate-600 disabled:to-slate-700 text-white font-semibold rounded-xl transition-all duration-300 transform hover:opacity-50 disabled:hover:scale-100 shadow-lg hover:shadow-xl disabled:shadow-none cursor-pointer px-6 md:px-8"
+                    >
+                      {loading ? (
+                        <>
+                          <Loader2 className="animate-spin w-4 md:w-5 h-4 md:h-5" />
+                          Estimating...
+                        </>
+                      ) : (
+                        <>
+                          <ImageIcon className="w-4 md:w-5 h-4 md:h-5 mr-2" />
+                          Estimate Depth
+                        </>
+                      )}
+                    </Button>
+
+                    <Button
+                      onClick={handleReset}
+                      className="h-12 bg-slate-700/80 hover:bg-slate-600/80 text-white font-semibold rounded-xl transition-all duration-300 cursor-pointer px-6 md:px-8"
+                    >
+                      <RotateCcw className="w-4 md:w-5 h-4 md:h-5" />
+                      Reset
+                    </Button>
+
+                    {depthUrl && (
+                      <a
+                        href={depthUrl}
+                        download="depth-map.png"
+                        className="h-12 text-sm inline-flex items-center bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-semibold rounded-xl transition-all duration-300 hover:opacity-50 shadow-lg hover:shadow-xl cursor-pointer px-6 md:px-8"
+                      >
+                        <Download className="w-4 md:w-5 h-4 md:h-5 mr-2" />
+                        Download
+                      </a>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
-        )}
+        </div>
       </div>
-    </main>
+    </div>
   );
 };

@@ -1,6 +1,6 @@
-import ObjectDetection from "@/components/ObjectDetection";
 import React from "react";
 import { Metadata } from "next";
+import ObjectDetection from "@/components/object-detection";
 
 export const metadata: Metadata = {
   title: "Object Detection",

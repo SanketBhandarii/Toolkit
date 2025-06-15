@@ -5,15 +5,15 @@ interface Props {
 }
 
 export const ImagePreview = ({ imageUrl }: Props) => (
-  <div className="rounded-xl p-2">
+  <div className="bg-slate-800/50 rounded-xl p-4 backdrop-blur-sm">
     <Image
       src={imageUrl}
       alt="Uploaded"
-      className="w-full rounded-md object-contain"
+      className="w-full rounded-lg object-contain border border-slate-600/30"
       width={0}
       height={0}
     />
-    <p className="text-center mt-2 text-xs text-muted-foreground text-gray-200">
+    <p className="text-center mt-3 text-sm text-gray-300 font-medium">
       Original Image
     </p>
   </div>

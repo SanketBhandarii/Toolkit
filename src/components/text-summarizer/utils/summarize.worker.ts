@@ -1,0 +1,37 @@
+import { loadSummarizer } from "./loadSummarizer";
+
+type WorkerMessage = {
+  status: "LOAD_MODEL" | "SUMMARIZE_TEXT";
+  payload?: string;
+};
+
+let summarizer: unknown = null;
+
+self.onmessage = async (event: MessageEvent<WorkerMessage>) => {
+  const { status, payload } = event.data;
+
+  if (status === "LOAD_MODEL") {
+    try {
+      summarizer = await loadSummarizer();
+      self.postMessage({ status: "MODEL_LOADED" });
+    } catch (error) {
+      self.postMessage({ status: "ERROR", summary: error instanceof Error ? error.message : String(error) });
+    }
+  }
+
+  if (status === "SUMMARIZE_TEXT") {
+    try {
+      if (!summarizer) throw new Error("Model not loaded");
+      if (!payload) throw new Error("No text provided");
+
+      const result = await (summarizer as any)(payload.trim(), {
+        max_length: 150,
+        min_length: 50,
+        do_sample: false,
+      });
+      self.postMessage({ status: "SUMMARY_RESULT", summary: result[0].summary_text });
+    } catch (error) {
+      self.postMessage({ status: "ERROR", summary: error instanceof Error ? error.message : String(error) });
+    }
+  }
+};

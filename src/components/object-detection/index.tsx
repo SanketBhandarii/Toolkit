@@ -13,41 +13,47 @@ export default function ObjectDetection() {
   }, []);
 
   return (
-    <section className="py-12 bg-neutral-900 min-h-screen flex items-center justify-center">
-      <div className="w-full max-w-6xl px-4">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
-          <h1 className="text-4xl font-extrabold text-gray-200">Object Detection</h1>
-          <div className="text-center sm:text-right">
+    <div className="min-h-screen pt-10 w-full bg-gradient-to-br from-[#012b28] via-black to-teal-950 overflow-hidden">
+      <div className="relative z-10 p-4 md:p-8">
+        <div className="w-full max-w-2xl lg:max-w-6xl mx-auto">
+          <div className="text-center mb-8 md:mb-12">
+            <div className="flex justify-center items-center mb-2">
+              <h1 className="text-2xl md:text-4xl font-bold bg-gradient-to-r from-teal-600 via-cyan-400 to-blue-400 bg-clip-text text-transparent">
+                Object Detection
+              </h1>
+            </div>
+            <p className="text-gray-400 text-sm md:text-lg">
+              Detect and identify objects in images with AI-powered recognition
+            </p>
+          </div>
+
+          <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-xl border border-slate-700/50 rounded-2xl md:rounded-3xl p-4 md:p-8 shadow-2xl">
             {detector.ready ? (
-              <div className="flex items-center justify-center sm:justify-end gap-2 text-emerald-400">
-                <Check className="w-5 h-5" />
-                <span className="font-medium">Transformer Ready</span>
+              <div className="flex items-center justify-center space-x-3 p-4 bg-slate-800/80 rounded-xl backdrop-blur-sm mb-6">
+                <Check className="h-5 w-5 text-emerald-400" />
+                <span className="text-gray-300 font-medium">AI Model Ready</span>
               </div>
             ) : (
-              <div className="flex flex-col gap-2">
-                <div className="flex items-center justify-center sm:justify-end gap-2 text-gray-500">
-                  <Loader2 className="animate-spin w-5 h-5" />
-                  <span className="font-medium">Loading model...</span>
-                </div>
-                <div className="w-full sm:w-36 bg-gray-200 h-2 rounded-full overflow-hidden mx-auto sm:ml-auto">
-                  <div className="bg-emerald-500 h-full transition-all duration-300 ease-in-out" style={{ width: `${detector.progress}%` }} />
-                </div>
-                <div className="text-xs text-gray-500 font-medium text-right">{Math.round(detector.progress)}%</div>
+              <div className="flex items-center justify-center space-x-3 p-4 bg-slate-800/80 rounded-xl backdrop-blur-sm mb-6">
+                <Loader2 className="h-5 w-5 animate-spin text-teal-400" />
+                <span className="text-gray-300">Loading AI model...</span>
+               
               </div>
             )}
+
+            <div className={!detector.ready ? "opacity-50 pointer-events-none" : ""}>
+              <Dropzone
+                status={detector.status}
+                setStatus={detector.setStatus}
+                detector={detector.start}
+                result={detector.result}
+                setResult={detector.setResult}
+                className="rounded-xl border-2 border-dashed border-slate-600/50 bg-slate-900/50 backdrop-blur-sm p-8 md:p-12 transition-all duration-300 hover:border-teal-500/50 hover:bg-slate-800/30 cursor-pointer"
+              />
+            </div>
           </div>
         </div>
-        <div className={!detector.ready ? "opacity-50 pointer-events-none" : ""}>
-          <Dropzone
-            status={detector.status}
-            setStatus={detector.setStatus}
-            detector={detector.start}
-            result={detector.result}
-            setResult={detector.setResult}
-            className="mt-10 rounded-2xl border-4 border-dashed border-neutral-500 bg-neutral-800 p-10 shadow-sm transition duration-300 hover:border-emerald-500 cursor-pointer"
-          />
-        </div>
       </div>
-    </section>
+    </div>
   );
 }

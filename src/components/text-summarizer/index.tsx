@@ -3,50 +3,43 @@
 import { useEffect, useRef, useState } from "react";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { Loader2 } from "lucide-react";
-import './styles.css'
+import { Loader2, FileText, RotateCcw } from "lucide-react";
+import "./styles.css";
 
 export const TextSummarizerController = () => {
   const workerRef = useRef<Worker | null>(null);
-
   const [inputText, setInputText] = useState("");
   const [summary, setSummary] = useState("");
   const [loading, setLoading] = useState(false);
   const [modelLoading, setModelLoading] = useState(true);
-  const [loadingProgress, setLoadingProgress] = useState(0);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
-      // ✅ This matches YOUR pattern
       workerRef.current = new Worker(
-        new URL("./utils/summarize.worker.js", import.meta.url),
+        new URL("./utils/summarize.worker.ts", import.meta.url),
         { type: "module" }
       );
 
       workerRef.current.onmessage = (event) => {
-        const { type, payload } = event.data;
-
-        switch (type) {
-          case "PROGRESS":
-            setLoadingProgress(payload);
-            break;
+        const { status, summary } = event.data;
+        switch (status) {
           case "MODEL_LOADED":
             setModelLoading(false);
             break;
           case "SUMMARY_RESULT":
-            setSummary(payload);
+            setSummary(summary);
             setLoading(false);
             break;
           case "ERROR":
-            setErrorMessage(payload);
+            setErrorMessage(summary);
             setLoading(false);
             setModelLoading(false);
             break;
         }
       };
 
-      workerRef.current.postMessage({ type: "LOAD_MODEL", payload: null });
+      workerRef.current.postMessage({ status: "LOAD_MODEL", payload: null });
     }
 
     return () => {
@@ -59,14 +52,11 @@ export const TextSummarizerController = () => {
       setErrorMessage("Please enter text.");
       return;
     }
-
     setLoading(true);
     setSummary("");
     setErrorMessage(null);
-    setLoadingProgress(0);
-
     workerRef.current?.postMessage({
-      type: "SUMMARIZE_TEXT",
+      status: "SUMMARIZE_TEXT",
       payload: inputText,
     });
   };
@@ -75,79 +65,94 @@ export const TextSummarizerController = () => {
     setInputText("");
     setSummary("");
     setErrorMessage(null);
-    setLoadingProgress(0);
     setLoading(false);
   };
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-neutral-900 p-6">
-      <div className="w-full max-w-4xl p-6 space-y-6 shadow-lg rounded-2xl bg-neutral-800">
-        <div>
-          <h1 className="text-3xl font-bold text-white">Text Summarization</h1>
-          <p className="text-muted-foreground text-sm text-white mt-3">
-            Enter some text to get a concise summary using a browser-based ML
-            model.
-          </p>
-        </div>
-
-        {modelLoading && (
-          <div className="space-y-2">
-            <div className="w-full bg-gray-200 rounded-full h-2.5">
-              <div
-                className="bg-blue-400 h-2.5 rounded-full transition-all duration-300"
-                style={{ width: `${loadingProgress}%` }}
-              ></div>
+    <div className="min-h-screen pt-10 w-full bg-gradient-to-br from-[#012b28] via-black to-teal-950 overflow-hidden">
+      <div className="relative z-10 p-4 md:p-8">
+        <div className="w-full max-w-2xl lg:max-w-3xl mx-auto">
+          <div className="text-center mb-8 md:mb-12">
+            <div className="flex justify-center items-center mb-2">
+              <h1 className="text-2xl md:text-4xl font-bold bg-gradient-to-r from-teal-600 via-cyan-400 to-blue-400 bg-clip-text text-transparent">
+                Text Summarizer
+              </h1>
             </div>
-            <div className="text-sm text-gray-500">
-              Loading model: {loadingProgress}%
+            <p className="text-gray-400 text-sm md:text-lg">
+              Transform long text into concise summaries instantly
+            </p>
+          </div>
+
+          <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-xl border border-slate-700/50 rounded-2xl md:rounded-3xl p-4 md:p-8 shadow-2xl">
+            <div className="space-y-4 md:space-y-6">
+              {modelLoading && (
+                <div className="flex items-center justify-center space-x-3 p-4 bg-slate-800/80 rounded-xl backdrop-blur-sm">
+                  <Loader2 className="h-5 w-5 animate-spin text-teal-400" />
+                  <span className="text-gray-300">Loading AI model...</span>
+                </div>
+              )}
+
+              {errorMessage && (
+                <div className="text-red-400 bg-red-900/20 p-3 rounded-xl border border-red-800/50 backdrop-blur-sm">
+                  {errorMessage}
+                </div>
+              )}
+
+              <div className="relative">
+                <Textarea
+                  value={inputText}
+                  onChange={(e) => setInputText(e.target.value)}
+                  placeholder="Paste your text here to get a summary..."
+                  disabled={modelLoading || loading}
+                  className="resize-none h-32 md:h-[200px] bg-slate-900/80 border-slate-600/50 text-gray-100 placeholder:text-gray-500 focus:border-teal-500/50 focus:ring-2 focus:ring-teal-500/20 rounded-xl md:rounded-2xl leading-relaxed backdrop-blur-sm transition-all duration-300 textarea"
+                />
+              </div>
+
+              <div className="flex justify-center pt-2 md:pt-4">
+                <div className="flex gap-3">
+                  <Button
+                    onClick={handleSummarize}
+                    disabled={modelLoading || loading || !inputText.trim()}
+                    className="h-12 bg-gradient-to-r from-teal-600 to-blue-600 disabled:from-slate-600 disabled:to-slate-700 text-white font-semibold rounded-xl transition-all duration-300 transform hover:opacity-50 disabled:hover:scale-100 shadow-lg hover:shadow-xl disabled:shadow-none cursor-pointer px-6 md:px-8"
+                  >
+                    {loading ? (
+                      <>
+                        <Loader2 className="animate-spin w-4 md:w-5 h-4 md:h-5" />
+                        Summarizing...
+                      </>
+                    ) : (
+                      <>
+                        <FileText className="w-4 md:w-5 h-4 md:h-5 mr-2" />
+                        Summarize
+                      </>
+                    )}
+                  </Button>
+                  
+                  {summary && (
+                    <Button
+                      onClick={handleReset}
+                      className="h-12 bg-slate-700/80 hover:bg-slate-600/80 text-white font-semibold rounded-xl transition-all duration-300 cursor-pointer px-6 md:px-8"
+                    >
+                      <RotateCcw className="w-4 md:w-5 h-4 md:h-5" />
+                      Reset
+                    </Button>
+                  )}
+                </div>
+              </div>
             </div>
           </div>
-        )}
 
-        {errorMessage && (
-          <div className="text-red-700 rounded">
-            {errorMessage}
-          </div>
-        )}
-
-        <Textarea
-          value={inputText}
-          onChange={(e) => setInputText(e.target.value)}
-          placeholder="Paste or write your text here..."
-          className="w-full h-48 border border-neutral-600 p-5 rounded-xl text-white placeholder:text-white  shadow-sm textarea"
-        />
-
-        <div className="flex gap-4">
-          <Button
-            onClick={handleSummarize}
-            disabled={modelLoading || loading}
-            className="cursor-pointer bg-neutral-700 text-white"
-          >
-            {loading ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Summarizing...
-              </>
-            ) : (
-              "Summarize"
-            )}
-          </Button>
-          <Button
-            variant="secondary"
-            onClick={handleReset}
-            className="cursor-pointer text-white"
-          >
-            Reset
-          </Button>
+          {summary && (
+            <div className="mt-6 md:mt-8 bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-xl border border-slate-700/50 rounded-2xl md:rounded-3xl p-4 md:p-8 shadow-2xl">
+              <h3 className="text-lg md:text-xl font-semibold text-teal-400 mb-4 flex items-center gap-2">
+                <FileText className="w-5 h-5" />
+                Summary
+              </h3>
+              <p className="text-gray-200 leading-relaxed">{summary}</p>
+            </div>
+          )}
         </div>
-
-        {summary && (
-          <div className="bg-gray-700 text-gray-200 rounded-xl p-4">
-            <h2 className="text-lg font-semibold mb-2">Summary:</h2>
-            <p>{summary}</p>
-          </div>
-        )}
       </div>
-    </main>
+    </div>
   );
 };

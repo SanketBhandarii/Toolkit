@@ -1,4 +1,5 @@
-import { TextSummarizerController } from "@/components/TextSummarizer";
+
+import { TextSummarizerController } from "@/components/text-summarizer";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -7,7 +8,7 @@ export const metadata: Metadata = {
 };
 
 const page = () => {
-  return <TextSummarizerController />;
+  return <TextSummarizerController/>;
 };
 
 export default page;

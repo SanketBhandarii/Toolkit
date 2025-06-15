@@ -1,4 +1,4 @@
-import TextToSpeech from "@/components/TextToSpeech";
+import Container from "@/components/text-to-speech/Container";
 import { Metadata } from "next";
 import React from "react";
 
@@ -9,11 +9,7 @@ export const metadata: Metadata = {
 };
 
 const page = () => {
-  return (
-    <div>
-      <TextToSpeech />
-    </div>
-  );
+  return <Container />;
 };
 
 export default page;

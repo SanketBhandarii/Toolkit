@@ -1,4 +1,5 @@
 import type { Detection } from "./hooks/useDetector";
+
 type BoundingBoxProps = {
   object: Detection;
 };
@@ -16,21 +17,27 @@ export default function BoundingBox({ object }: BoundingBoxProps) {
   return (
     <>
       <div
-        className="absolute text-xs px-2 py-0.5 text-white font-semibold rounded shadow-lg z-10"
+        className="absolute text-xs px-2 py-1 text-white font-semibold rounded-md shadow-lg z-10 backdrop-blur-sm"
         style={{
           left,
-          top: `calc(${top} - 1.2rem)`, // offset ~18px above box
-          backgroundColor: color,
-          padding: "2px 6px",
+          top: `calc(${top} - 1.5rem)`,
+          backgroundColor: `${color}CC`,
+          border: `1px solid ${color}`,
           whiteSpace: "nowrap",
-          color: "white",
         }}
       >
         {label} {Math.round(score * 100)}%
       </div>
       <div
-        className="absolute border-2 z-10"
-        style={{ left, top, width, height, borderColor: color }}
+        className="absolute border-2 z-10 rounded-sm"
+        style={{ 
+          left, 
+          top, 
+          width, 
+          height, 
+          borderColor: color,
+          boxShadow: `0 0 0 1px rgba(0,0,0,0.3), inset 0 0 0 1px ${color}33`
+        }}
       />
     </>
   );
@@ -38,7 +45,7 @@ export default function BoundingBox({ object }: BoundingBoxProps) {
 
 const COLORS = [
   "#FF6B6B",
-  "#4ECDC4",
+  "#4ECDC4", 
   "#45B7D1",
   "#96CEB4",
   "#FFEAA7",
@@ -47,6 +54,14 @@ const COLORS = [
   "#F7DC6F",
   "#BB8FCE",
   "#85C1E9",
+  "#FF9F43",
+  "#70A1FF",
+  "#5F27CD",
+  "#00D2D3",
+  "#FF6348",
+  "#2ED573",
+  "#FFA502",
+  "#3742FA",
 ];
 
 function getColorForLabel(label: string): string {

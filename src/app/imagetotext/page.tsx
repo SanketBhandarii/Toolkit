@@ -1,14 +1,14 @@
 import React from "react";
 import { Metadata } from "next";
-import ImageToTextPage from "@/components/ImageToText";
+import ImageToText from "@/components/ocr-tool";
 
 export const metadata: Metadata = {
   title: "Image To Text",
   description: "Identify the text from the image",
 };
 
-const page = () => {
-  return <ImageToTextPage />;
+const page = () =>{
+  return <ImageToText/>;
 };
 
 export default page;

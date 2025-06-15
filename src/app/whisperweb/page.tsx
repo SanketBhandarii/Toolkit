@@ -1,5 +1,5 @@
+import Transcriber from "@/components/speech-to-text/Transcriber";
 import { Metadata } from "next";
-import WhisperWeb from "@/components/WhisperWeb";
 
 export const metadata: Metadata = {
   title: "Whisper Web",
@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 export default function WhisperWebPage() {
   return (
     <div>
-      <WhisperWeb />
+      <Transcriber />
     </div>
   );
 }

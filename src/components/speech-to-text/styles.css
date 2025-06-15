@@ -1,0 +1,4 @@
+.remove-shadow:focus {
+  box-shadow: none;
+  outline: none;
+}
