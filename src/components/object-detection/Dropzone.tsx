@@ -59,16 +59,6 @@ export default function Dropzone({
     setResult(null);
   };
 
-  const downloadImage = async () => {
-    if (!imageRef.current) return;
-    const element = imageRef.current;
-    const canvas = await html2canvas(element, { backgroundColor: null });
-    const link = document.createElement("a");
-    link.download = "detected-objects.png";
-    link.href = canvas.toDataURL("image/png");
-    link.click();
-  };
-
   const uniqueLabels = [...new Set(result?.map((r) => r.label) || [])];
 
   return (
@@ -130,7 +120,10 @@ export default function Dropzone({
                   </h3>
                   <div className="space-y-2 max-h-60 overflow-y-auto">
                     {uniqueLabels.map((label, i) => (
-                      <div key={i} className="bg-slate-700/50 px-3 py-2 rounded-lg text-gray-200 text-sm">
+                      <div
+                        key={i}
+                        className="bg-slate-700/50 px-3 py-2 rounded-lg text-gray-200 text-sm"
+                      >
                         {label}
                       </div>
                     ))}
@@ -139,18 +132,6 @@ export default function Dropzone({
               </div>
             )}
           </div>
-
-          {status === "complete" && (
-            <div className="flex justify-center pt-4">
-              <button
-                onClick={downloadImage}
-                className="h-12 bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-semibold rounded-xl transition-all duration-300 hover:opacity-50 shadow-lg hover:shadow-xl cursor-pointer px-6 md:px-8 flex items-center gap-2"
-              >
-                <Download className="w-4 md:w-5 h-4 md:h-5" />
-                Download Result
-              </button>
-            </div>
-          )}
         </div>
       )}
     </>
